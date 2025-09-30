@@ -9,10 +9,10 @@ jobs:
     autopull:
         runs-on: [self-hosted, Linux, X64]
 
-        env:
-            WORKDIR: ${{ env.HOME }}/repos/agentic-ai-security
-
         steps:
+            - name: Set WORKDIR variable
+              run: echo "WORKDIR=$HOME/repos/agentic-ai-security" >> "$GITHUB_ENV"
+
             - name: Ensure target directory exists
               run: |
                     mkdir -p "$WORKDIR"
