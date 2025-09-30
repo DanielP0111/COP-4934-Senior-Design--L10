@@ -1,0 +1,35 @@
+name: Autopull on push
+
+on:
+    push:
+        branches: [ "main" ]
+    workflow_dispatch: {}
+
+jobs:
+    autopull:
+        runs-on: [self-hosted, Linux, X64]
+
+        env:
+            WORKDIR: ${{ env.HOME }}/repos/agentic-ai-security
+
+        steps:
+            - name: Ensure target directory exists
+              run: |
+                    mkdir -p "$WORKDIR"
+
+            - name: Sync repo (shallow)
+              run: |
+                    set -euo pipefail
+                    if [ ! -d "$WORKDIR/.git" ]; then
+                        git clone --branch "${GITHUB_REF_NAME:-main}" --depth=1 "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" "$WORKDIR"
+                    else
+                        git -C "$WORKDIR" remote set-url origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
+                        git -C "$WORKDIR" fetch --depth=1 origin "${GITHUB_REF_NAME:-main}"
+                        git -C "$WORKDIR" reset --hard "origin/${GITHUB_REF_NAME:-main}"
+                        git -C "$WORKDIR" clean -fdx
+                    fi
+
+            - name: Show current revision
+              run: |
+                    git -C "$WORKDIR" rev-parse --short HEAD
+                    git -C "$WORKDIR" status --porcelain -b
