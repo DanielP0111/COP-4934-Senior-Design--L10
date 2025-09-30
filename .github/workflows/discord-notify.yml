@@ -1,24 +1,28 @@
 name: Discord notify on push
 
 on:
-    push: {}
-    workflow_dispatch: {}
+  push: {}
+  workflow_dispatch: {}
 
 jobs:
-    notify:
-        runs-on: [self-hosted, Linux, X64]
-        steps:
-            - name: Send message to Discord
-              env:
-                    DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-                    MSG: |
-                        📦 Push to ${{ github.ref_name }} by ${{ github.actor }}: ${{ github.sha }}
-                        ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
-              run: |
-                    python3 - <<'PY'
-                    import json, os, sys, urllib.request
-                    body = json.dumps({"content": os.environ["MSG"]}).encode()
-                    req = urllib.request.Request(os.environ["DISCORD_WEBHOOK"], data=body, headers={"Content-Type":"application/json"})
-                    with urllib.request.urlopen(req) as r:
-                        print(f"Discord response: {r.status}")
-                    PY
+  notify:
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - name: Post to Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          MSG: |
+            📦 Push to ${{ github.ref_name }} by ${{ github.actor }}: ${{ github.sha }}
+            ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import json, os, sys, urllib.request, urllib.error
+          url=os.environ["DISCORD_WEBHOOK"].strip()
+          msg=os.environ.get("MSG","").strip()
+          if not msg:
+              print("ERROR: MSG is empty"); sys.exit(1)
+          body=json.dumps({"content": msg}).encode()
+          req=urllib.request.Request(url, data=body, headers={"Content-Type":"application/json"})
+          with urllib.request.urlopen(req) as r:
+              print("Discord response:", r.status)
+          PY
