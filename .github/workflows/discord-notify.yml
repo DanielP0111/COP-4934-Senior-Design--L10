@@ -1,40 +1,30 @@
 name: Discord notify on push
 
 on:
-  push: {}
-  workflow_dispatch: {}
+    push: {}
+    workflow_dispatch: {}
 
 jobs:
-  notify:
-    runs-on: [self-hosted, Linux, X64]
-    steps:
-      - name: Check webhook env (non-secret info)
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        run: |
-          python3 - <<'PY'
-          import os, urllib.parse
-          u = os.environ["DISCORD_WEBHOOK"]
-          print("Len:", len(u))
-          print("Ends with whitespace:", u != u.strip())
-          p = urllib.parse.urlparse(u)
-          print("Scheme:", p.scheme, "Host:", p.netloc, "Path length:", len(p.path))
-          PY
-      - name: Post to Discord
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          MSG: |
-            📦 Push to ${{ github.ref_name }} by ${{ github.actor }}: ${{ github.sha }}
-            ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
-        run: |
-          python3 - <<'PY'
-          import json, os, sys, urllib.request, urllib.error
-          url=os.environ["DISCORD_WEBHOOK"].strip()
-          msg=os.environ.get("MSG","").strip()
-          if not msg:
-              print("ERROR: MSG is empty"); sys.exit(1)
-          body=json.dumps({"content": msg}).encode()
-          req=urllib.request.Request(url, data=body, headers={"Content-Type":"application/json"})
-          with urllib.request.urlopen(req) as r:
-              print("Discord response:", r.status)
-          PY
+    notify:
+        runs-on: [self-hosted, Linux, X64]
+
+        steps:
+            - name: Build message body
+              env:
+                    MSG: |
+                        📦 Push to ${{ github.ref_name }} by ${{ github.actor }}: ${{ github.sha }}
+                        ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+              run: |
+                    if [ -z "${MSG// }" ]; then echo "Message is empty"; exit 1; fi
+                    python3 - <<'PY' > body.json
+                    import json, os
+                    print(json.dumps({"content": os.environ["MSG"].strip()}))
+                    PY
+                    echo "Body:"
+                    cat body.json
+
+            - name: Post to Discord
+              env:
+                    DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+              run: |
+                    curl -i -H "Content-Type: application/json" -d @body.json "$DISCORD_WEBHOOK"
