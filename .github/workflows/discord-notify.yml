@@ -8,6 +8,18 @@ jobs:
   notify:
     runs-on: [self-hosted, Linux, X64]
     steps:
+      - name: Check webhook env (non-secret info)
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          python3 - <<'PY'
+          import os, urllib.parse
+          u = os.environ["DISCORD_WEBHOOK"]
+          print("Len:", len(u))
+          print("Ends with whitespace:", u != u.strip())
+          p = urllib.parse.urlparse(u)
+          print("Scheme:", p.scheme, "Host:", p.netloc, "Path length:", len(p.path))
+          PY
       - name: Post to Discord
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
