@@ -6,13 +6,19 @@ on:
 
 jobs:
     notify:
-        runs-on: ubuntu-latest
+        runs-on: [self-hosted, Linux, X64]
         steps:
             - name: Send message to Discord
               env:
                     DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+                    MSG: |
+                        📦 Push to ${{ github.ref_name }} by ${{ github.actor }}: ${{ github.sha }}
+                        ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
               run: |
-                    COMMIT_URL="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
-                    MSG="📦 Push to ${GITHUB_REF_NAME} by ${GITHUB_ACTOR}: ${GITHUB_SHA::7}\n${COMMIT_URL}"
-                    jq -n --arg content "$MSG" '{content: $content}' \
-                    | curl -fsSL -H "Content-Type: application/json" -d @- "$DISCORD_WEBHOOK"
+                    python3 - <<'PY'
+                    import json, os, sys, urllib.request
+                    body = json.dumps({"content": os.environ["MSG"]}).encode()
+                    req = urllib.request.Request(os.environ["DISCORD_WEBHOOK"], data=body, headers={"Content-Type":"application/json"})
+                    with urllib.request.urlopen(req) as r:
+                        print(f"Discord response: {r.status}")
+                    PY
