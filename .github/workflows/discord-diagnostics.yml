@@ -1,0 +1,15 @@
+name: Discord diagnostics
+on:
+    workflow_dispatch: {}
+
+jobs:
+    ping:
+        runs-on: [self-hosted, Linux, X64]
+        steps:
+            - name: Minimal post
+              env:
+                    DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+              run: |
+                    curl -i -H "Content-Type: application/json" \
+                         -d '{"content":"Manual diagnostics ✅"}' \
+                         "$DISCORD_WEBHOOK" || true
