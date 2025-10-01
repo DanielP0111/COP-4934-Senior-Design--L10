@@ -10,24 +10,35 @@ jobs:
         runs-on: [self-hosted, Linux, X64]
 
         steps:
-            - name: Set WORKDIR variable
+            - name: Set WORKDIR
               run: echo "WORKDIR=$HOME/repos/agentic-ai-security" >> "$GITHUB_ENV"
 
-            - name: Ensure target directory exists
+            - name: Sync repo (shallow) with GITHUB_TOKEN
+              env:
+                  GH_SERVER: ${{ github.server_url }}
+                  GH_REPO: ${{ github.repository }}
+                  BRANCH: ${{ github.ref_name }}
+                  TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                    mkdir -p "$WORKDIR"
+                  set -euo pipefail
+                  AUTH_URL="${GH_SERVER/https:\/\//https:\/\/x-access-token:${TOKEN}@}/${GH_REPO}.git"
+                  BR="${BRANCH:-main}"
+                  if [ ! -d "$WORKDIR/.git" ]; then
+                      git clone --branch "$BR" --depth=1 "$AUTH_URL" "$WORKDIR"
+                  else
+                      git -C "$WORKDIR" remote set-url origin "$AUTH_URL"
+                      git -C "$WORKDIR" fetch --depth=1 origin "$BR"
+                      git -C "$WORKDIR" reset --hard "origin/$BR"
+                      git -C "$WORKDIR" clean -fdx
+                  fi
+                  # Scrub tokenized origin URL
+                  git -C "$WORKDIR" remote set-url origin "${GH_SERVER}/${GH_REPO}.git"
 
-            - name: Sync repo (shallow)
+            - name: Show current revision
               run: |
-                    set -euo pipefail
-                    if [ ! -d "$WORKDIR/.git" ]; then
-                        git clone --branch "${GITHUB_REF_NAME:-main}" --depth=1 "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" "$WORKDIR"
-                    else
-                        git -C "$WORKDIR" remote set-url origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
-                        git -C "$WORKDIR" fetch --depth=1 origin "${GITHUB_REF_NAME:-main}"
-                        git -C "$WORKDIR" reset --hard "origin/${GITHUB_REF_NAME:-main}"
-                        git -C "$WORKDIR" clean -fdx
-                    fi
+                  git -C "$WORKDIR" rev-parse --short HEAD
+                  git -C "$WORKDIR" status --porcelain -b
+
 
             - name: Show current revision
               run: |
