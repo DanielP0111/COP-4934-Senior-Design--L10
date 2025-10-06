@@ -1,0 +1,11 @@
+[
+    {
+        "model": "qwen2.5-coder:0.5b",
+        "api_type": "ollama",
+        "client_host": "http://localhost:11434",
+        "temperature": 0.3
+        
+    }
+]
+
+
