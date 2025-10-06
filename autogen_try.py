@@ -26,3 +26,14 @@ user_proxy.initiate_chat(
     assistant,
     message="Tell me 3 facts about the University of Central Florida.",
 )
+'''
+To Run:
+- ollama pull qwen2.5-coder:0.5b
+- ollama serve  (checks if ollama is running)
+- python3 -m venv name_of_your_venv
+- source name_of_your_venv/bin/activate
+- pip install "pyautogen[ollama]"
+- pip install "autogen-ext[ollama]"
+- pip install autogen
+- python autogen_try.py
+'''
