@@ -1,7 +1,8 @@
 services:
   web:
+    container_name: web-server
     image: nginx:latest
     ports:
       - "8080:80"
-    volumes:
-      - ./src/html:/usr/share/nginx/html
+    #volumes:
+      #- ./src/html:/usr/share/nginx/html
