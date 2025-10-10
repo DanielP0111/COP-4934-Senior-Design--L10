@@ -1,26 +1,73 @@
-import autogen
+from autogen import AssistantAgent, LLMConfig, UserProxyAgent
+from typing import Optional, Type
+from pydantic import BaseModel, Field
+from langchain.tools import BaseTool
+
+# Activate the venv and run:
+# pip install langchain langchain-community ag2[ollama]
+# If you want to run this as main, follow the steps listed in the main file, currently named "autogen_try.py"
 
 # Continue following: https://www.youtube.com/watch?v=ffG0zaYtOF4 around 2:14
-# class APIToolInput(BaseModel):
-        
+class APIToolInput(BaseModel):
+    request: str = Field()
+
+class APITool(BaseTool):
+    name: str = "api_requester"
+    description: str = "Use this tool when you need to get information about a healthcare insurance provider."
+    args_schema: Type[BaseModel] = APIToolInput
+    
+    def _run(self, request: str):
+        return "The healthcare insurance is very good here!"
+
+def generate_llm_config(tool):
+    function_schema = {
+        "name": tool.name.lower().replace(" ", "_"),
+        "description": tool.description,
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": [],
+        },
+    }
+
+    if tool.args is not None:
+        function_schema["parameters"]["properties"] = tool.args
+    
+    return function_schema
 
 class APIAgent:
     def __init__(self, config):
-        self.agent = autogen.AssistantAgent(
+        self.agent = AssistantAgent(
             name="API Agent",
-            llm_config = config[0],
-            system_message="""You are a healthcare professional. When prompted you will provide information about healthcare insurance
-            providers and the cost of the medicine under a specific provider.""",
+            llm_config = config,
+            system_message="""
+            You are a healthcare professional. When prompted, you must use the api_requester tool to answer any question
+            about healthcare insurance providers. Do not answer directly. Always use the tool first.
+            """,
         )
 
-if name == "__main__":
-    config_list_ollama = autogen.config_list_from_json(
-            env_or_file= "OAI_CONFIG_LIST.json"
+if __name__ == "__main__":
+    api_tool = APITool()
+    
+    # Can do multiple functions. Maybe for different API endpoints I do different functions?
+    llm_config = LLMConfig(
+        functions = [
+            generate_llm_config(api_tool),
+        ],
+        # Doing this instead of calling the json because that method is depreciated.
+        config_list = [
+            {
+                "model": "qwen2.5:1.5b",
+                "api_type": "ollama",
+                "client_host": "http://localhost:11434",
+                "temperature": 0.3
+                
+            }
+        ],
+        timeout = 120,
     )
     
-    apiAgent = APIAgent(config=config_list_ollama)
-    
-    user_proxy = autogen.UserProxyAgent(
+    user_proxy = UserProxyAgent(
         name="user_proxy",
         human_input_mode="TERMINATE",
         max_consecutive_auto_reply= 1,
@@ -28,7 +75,17 @@ if name == "__main__":
                             "use_docker": False},
     )
 
+    user_proxy.register_function(
+        function_map={
+            api_tool.name: api_tool._run,
+        }
+    )
+
+    # Note the .agent at the end. This references the agent in the wrapper so no class annoyingness happens after its passed.
+    apiAgent = APIAgent(llm_config).agent
+
     user_proxy.initiate_chat(
         apiAgent,
-        message="I have United Healthcare, how much will my month worth of Insulin cost?",
+        message="I need to get information about a healthcare insurance provider.",
+        llm_config=llm_config
     )
