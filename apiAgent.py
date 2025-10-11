@@ -17,22 +17,17 @@ class APITool(BaseTool):
     args_schema: Type[BaseModel] = APIToolInput
     
     def _run(self, request: str):
-        return "The healthcare insurance is very good here!"
+        print("API Tool has been used.")
+        return "United Healthcare has been rated 'very good' by a professional doctor named Ted."
 
+# This creates a pydantic dictionary "schema" that lets the agent understand its tool (easily scalable for many tools hopefully)
 def generate_llm_config(tool):
+    args_schema = tool.args_schema.model_json_schema() if hasattr(tool, "args_schema") else {}
     function_schema = {
-        "name": tool.name.lower().replace(" ", "_"),
+        "name": tool.name,
         "description": tool.description,
-        "parameters": {
-            "type": "object",
-            "properties": {},
-            "required": [],
-        },
+        "parameters": args_schema,
     }
-
-    if tool.args is not None:
-        function_schema["parameters"]["properties"] = tool.args
-    
     return function_schema
 
 class APIAgent:
@@ -51,15 +46,15 @@ if __name__ == "__main__":
     
     # Can do multiple functions. Maybe for different API endpoints I do different functions?
     llm_config = LLMConfig(
-        functions = [
+        tools = [
             generate_llm_config(api_tool),
         ],
         # Doing this instead of calling the json because that method is depreciated.
         config_list = [
             {
-                "model": "qwen2.5:1.5b",
+                "model": "qwen2.5:3b",
                 "api_type": "ollama",
-                "client_host": "http://localhost:11434",
+                "base_url": "http://localhost:11434",
                 "temperature": 0.3
                 
             }
@@ -69,7 +64,7 @@ if __name__ == "__main__":
     
     user_proxy = UserProxyAgent(
         name="user_proxy",
-        human_input_mode="TERMINATE",
+        human_input_mode="ALWAYS",
         max_consecutive_auto_reply= 1,
         code_execution_config={"work_dir": "coding",
                             "use_docker": False},
@@ -86,6 +81,6 @@ if __name__ == "__main__":
 
     user_proxy.initiate_chat(
         apiAgent,
-        message="I need to get information about a healthcare insurance provider.",
+        message="I need to get information about a healthcare insurance provider called United Healthcare.",
         llm_config=llm_config
     )
