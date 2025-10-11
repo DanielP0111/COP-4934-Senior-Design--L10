@@ -8,7 +8,11 @@ import os
 os.environ.pop("AUTOGEN_CONFIG_LIST", None)
 
 # activate .venv and run:
-# pip install langchain langchain-community ag2[ollama]
+# pip install -U pyautogen langchain pydantic openai
+# export MODEL_BASE_URL=http://localhost:11434/v1
+# export MODEL_NAME=qwen2.5:3b-instruct
+# export OPENAI_API_KEY=ollama
+# python addAgent.py
 
 # 1) llm config
 # make sure you have pulled Qwen using the following command: ollama pull qwen2.5:3b-instruct
