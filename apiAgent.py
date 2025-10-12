@@ -22,12 +22,6 @@ class APITool(BaseTool):
         print("API Tool has been used.")
         return "United Healthcare has been rated 'very good' by a professional doctor named Ted."
 
-# Is this really the only way?
-api_tool = APITool()
-
-def sendRequest(request: str) -> str:
-    return api_tool.invoke({"request": request})
-
 # This creates a pydantic dictionary "schema" that lets the agent understand its tool (easily scalable for many tools hopefully)
 def generate_llm_config(tool):
     args_schema = tool.args_schema.model_json_schema() if hasattr(tool, "args_schema") else {}
@@ -39,38 +33,54 @@ def generate_llm_config(tool):
     return {"function": function_schema}
 
 class APIAgent:
-    def __init__(self, config):
+    def __init__(self):
+        self.tools = [APITool()]
+        self.tools_config = self.toolsConfig()
+        self.config = self.getConfig()
         self.agent = AssistantAgent(
             name="APIAgent",
-            llm_config = config,
+            llm_config = self.config,
             system_message="""
             You are a healthcare professional. When prompted, you must use the api_requester tool to answer any question
             about healthcare insurance providers. Do not answer directly. Always use the tool first. 
             When you use the tool, only return the output of the tool.
             """,
         )
-
-if __name__ == "__main__":
-    # Can do multiple functions. Maybe for different API endpoints I do different functions?
-    llm_config = LLMConfig(
-        tools = [
-            generate_llm_config(api_tool),
-        ],
-        # Doing this instead of calling the json because that method is depreciated.
-        config_list = [
-            {
-                "model": "qwen2.5:3b",
-                "api_type": "openai",
-                "api_key": OPENAI_API_KEY,
-                "base_url": "http://localhost:11434/v1",
-                "temperature": 0.3,
-                "tool_choice": "required",
-                "price": [0.0, 0.0],
-            }
-        ],
-        timeout = 120,
-    )
     
+    def toolsConfig(self):
+        tools_config = []
+        for tool in self.tools:
+            tools_config.append(generate_llm_config(tool))
+            
+        return tools_config
+    
+    def getConfig(self):
+        config = LLMConfig(
+            tools = self.tools_config,
+            # Doing this instead of calling the json for now. Will change after meeting once JSON is updated.
+            config_list = [
+                {
+                    "model": "qwen2.5:3b",
+                    "api_type": "openai",
+                    "api_key": OPENAI_API_KEY,
+                    "base_url": "http://localhost:11434/v1",
+                    "temperature": 0.3,
+                    "tool_choice": "required",
+                    "price": [0.0, 0.0],
+                }
+            ],
+            timeout = 120,
+        )
+        
+        return config
+    
+    def registerExecution(self, user_proxy):
+        for tool in self.tools:
+            user_proxy.register_for_execution(
+                name=tool.name,
+            )(lambda **kwargs: tool.invoke(kwargs))
+
+if __name__ == "__main__":    
     user_proxy = UserProxyAgent(
         name="user_proxy",
         human_input_mode="TERMINATE",
@@ -78,15 +88,31 @@ if __name__ == "__main__":
         code_execution_config={"use_docker": False},
     )
 
-    # Note the .agent at the end. This references the agent in the wrapper so no class annoyingness happens after its passed.
-    apiAgent = APIAgent(llm_config).agent
+    # Initializes a class with an agent. Tool(s) are initialized inside.
+    apiAgent = APIAgent()
 
-    user_proxy.register_for_execution(
-        name=api_tool.name,
-    )(sendRequest)
+    # Allows for the user_proxy to execute a tool(s)
+    apiAgent.registerExecution(user_proxy)
 
+    # This will become the JSON call once we fix that up.
+    config = LLMConfig(
+            config_list = [
+                {
+                    "model": "qwen2.5:3b",
+                    "api_type": "openai",
+                    "api_key": OPENAI_API_KEY,
+                    "base_url": "http://localhost:11434/v1",
+                    "temperature": 0.3,
+                    "tool_choice": "required",
+                    "price": [0.0, 0.0],
+                }
+            ],
+            timeout = 120,
+        )
+
+    # Make sure to write .agent since apiAgent is a class object
     user_proxy.initiate_chat(
-        apiAgent,
+        apiAgent.agent,
         message="I need to get information about a healthcare insurance provider called United Healthcare.",
-        llm_config=llm_config
+        llm_config=config
     )
