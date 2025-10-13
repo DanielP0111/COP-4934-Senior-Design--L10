@@ -1,7 +1,8 @@
 from autogen import AssistantAgent, LLMConfig, UserProxyAgent
-from typing import Optional, Type
+from typing import Type
 from pydantic import BaseModel, Field
 from langchain.tools import BaseTool
+from baseAgent import BaseAgent
 
 # Activate the venv and run:
 # pip install langchain langchain-community ag2[ollama]
@@ -32,53 +33,20 @@ def generate_llm_config(tool):
     }
     return {"function": function_schema}
 
-class APIAgent:
+class APIAgent(BaseAgent):
     def __init__(self):
-        self.tools = [APITool()]
-        self.tools_config = self.toolsConfig()
-        self.config = self.getConfig()
-        self.agent = AssistantAgent(
-            name="APIAgent",
-            llm_config = self.config,
-            system_message="""
+        self.name = "APIAgent"
+        self.system_message = """
             You are a healthcare professional. When prompted, you must use the api_requester tool to answer any question
             about healthcare insurance providers. Do not answer directly. Always use the tool first. 
             When you use the tool, only return the output of the tool.
-            """,
-        )
-    
-    def toolsConfig(self):
-        tools_config = []
-        for tool in self.tools:
-            tools_config.append(generate_llm_config(tool))
-            
-        return tools_config
-    
-    def getConfig(self):
-        config = LLMConfig(
-            tools = self.tools_config,
-            # Doing this instead of calling the json for now. Will change after meeting once JSON is updated.
-            config_list = [
-                {
-                    "model": "qwen2.5:3b",
-                    "api_type": "openai",
-                    "api_key": OPENAI_API_KEY,
-                    "base_url": "http://localhost:11434/v1",
-                    "temperature": 0.3,
-                    "tool_choice": "required",
-                    "price": [0.0, 0.0],
-                }
-            ],
-            timeout = 120,
-        )
+            """
         
-        return config
-    
-    def registerExecution(self, user_proxy):
-        for tool in self.tools:
-            user_proxy.register_for_execution(
-                name=tool.name,
-            )(lambda **kwargs: tool.invoke(kwargs))
+        super().__init__(
+            name = "APIAgent",
+            system_message = self.system_message,
+            tools = [APITool()]
+        )
 
 if __name__ == "__main__":    
     user_proxy = UserProxyAgent(
@@ -95,20 +63,7 @@ if __name__ == "__main__":
     apiAgent.registerExecution(user_proxy)
 
     # This will become the JSON call once we fix that up.
-    config = LLMConfig(
-            config_list = [
-                {
-                    "model": "qwen2.5:3b",
-                    "api_type": "openai",
-                    "api_key": OPENAI_API_KEY,
-                    "base_url": "http://localhost:11434/v1",
-                    "temperature": 0.3,
-                    "tool_choice": "required",
-                    "price": [0.0, 0.0],
-                }
-            ],
-            timeout = 120,
-        )
+    config = LLMConfig.from_json(path = "OAI_CONFIG_LIST.json")
 
     # Make sure to write .agent since apiAgent is a class object
     user_proxy.initiate_chat(
