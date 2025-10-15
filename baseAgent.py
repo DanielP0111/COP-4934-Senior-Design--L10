@@ -45,6 +45,7 @@ class BaseAgent:
 
     def registerExecution(self, user_proxy: UserProxyAgent):
         for tool in self.tools:
+<<<<<<< HEAD
             def make_executor(t):
                 return lambda **kwargs: t.invoke(kwargs)
         
