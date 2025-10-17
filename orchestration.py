@@ -1,11 +1,14 @@
 import asyncio
-from autogen_agentchat.agents import AssistantAgent, UserProxyAgent 
-from autogen_agentchat.conditions import HandoffTermination, TextMentionTermination
-from autogen_agentchat.messages import HandoffMessage
+from autogen import AssistantAgent, UserProxyAgent,LLMConfig 
+from autogen_agentchat.conditions import MaxMessageTermination, TextMessageTermination
+from autogen_agentchat.messages import ChatMessage
+from autogen_agentchat.base import Handoff
 from autogen_agentchat.teams import Swarm
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 from autogen_agentchat.ui import Console
 import os
+from apiAgent import APIAgent
+from dbAgent import DBAgent, DatabaseConnection
 
 #pip install "autogen-ext[openai]"
 
@@ -27,12 +30,16 @@ model_client = OpenAIChatCompletionClient(
     parallel_tool_calls=False
 )
 
-
+dbAgent = DBAgent(DatabaseConnection)
+apiAgent = APIAgent()
 # Create the agents
 orchestrator_agent = AssistantAgent(
     name="orchestrator",
     model_client=model_client,
-    handoffs = ["dbAgent", "apiAgent","user"], # can handoff to user if more info needed
+    handoffs = [
+        Handoff(target = dbAgent, description = 'When the users prompt is related to their personal healthcare data, medical history, appointments, or insurance provider.'),
+        Handoff(target = apiAgent, description = 'When the users prompts are related to health tips, medical inquiries or advice')
+        ], 
     system_message="""You are an orchestrator agent for a healthcare clinic application.
       Your task is to manage and coordinate the interactions between 
       the user and the other assistant agents. Any questions the user has about their insurance provider,
@@ -41,62 +48,55 @@ orchestrator_agent = AssistantAgent(
       """
 )
 
-#example db agent to test handoff and swarm functionality
-dbAgent = AssistantAgent(
-    name="dbAgent",
-    model_client=model_client,
-    handoffs = ["orchestrator","user"], # can handoff to user if more info needed
-    system_message="""You are a database assistant for a healthcare clinic application.
-      Your task is to provide accurate and concise information about the user's insurance provider,
-      medical history, and appointments based on the user's queries. If you do not have enough information
-      to answer the user's question, do not continue to make assumptions;
-        you must handoff the conversation to the user for more details""",
-)
-#example api agent to test handoff and swarm functionality
-apiAgent = AssistantAgent(
-    name="apiAgent",
-    model_client=model_client,
-    handoffs = ["orchestrator","user"],# can handoff to user if more info needed
-    system_message="""You are a helpful assistant. Provide clear and concise answers.
-      Your task is to provide information about clinic services, health tips, or general medical inquiries.
-      If you do not have enough information to answer the user's question, do not continue to make assumptions;
-     hand off the conversation to the user for more details.""",
-)
+termination = TextMessageTermination(source = orchestrator_agent) | MaxMessageTermination(max_messages=15)
+team = Swarm(participants=[dbAgent, apiAgent,orchestrator_agent], termination_condition=termination)
 
-termination = HandoffTermination(target="user") | TextMentionTermination("TERMINATE")
-team = Swarm([dbAgent, apiAgent,orchestrator_agent], termination_condition=termination)
+async def run_team_stream(input: ChatMessage):
+   return await Console(team.run_team_stream(task= input))
+    
 
+   
+if __name__ == "__main__":    
+    user_proxy = UserProxyAgent(
+        name="user_proxy",
+        human_input_mode="TERMINATE",
+        max_consecutive_auto_reply= 1,
+        code_execution_config={"use_docker": False},
+    )
 
-task = "I need to schedule an appointment."
+    # Initializes a class with an agent. Tool(s) are initialized inside.
+    apiAgent = APIAgent()
 
+    # Allows for the user_proxy to execute a tool(s)
+    apiAgent.registerExecution(user_proxy)
 
-async def run_team_stream() -> None:
-    task_result = await Console(team.run_stream(task=task))
-    last_message = task_result.messages[-1]
+    # This will become the JSON call once we fix that up.
+    config = LLMConfig.from_json(path = "OAI_CONFIG_LIST.json")
+    print("="*50)
+    print("initializing database agent...")
+    print("="*50)
 
-    while True:
-        if isinstance(last_message, HandoffMessage) and last_message.target == "user":
-            user_message = input("User: ")
+    # init db connection (in this case for testing it's in-memory)
+    print("\n1. setting up database connection...")
+    db_connection = DatabaseConnection()
 
-            task_result = await Console(
-                team.run_stream(
-                    task= HandoffMessage(
-                        source="user",
-                        target=last_message.source,
-                        content=user_message
-                    )
-                )
-            )
-            last_message = task_result.messages[-1]
-        # Case 2: termination by agent
-        elif isinstance(last_message, TextMentionTermination):
-            print("Conversation terminated.")
-            break
+    # test db connection
+    print("\n2. testing database connection...")
+    db_connection.test_connection()
 
-        # Case 3: normal end (no more messages)
-        else:
-            break
+    # init the db agent
+    print("\n4. initializing DBAgent...")
+    db_agent = DBAgent(db_connection)
+
+    # register tools for execution
+    print("\n5. registering tools for execution...")
+    db_agent.registerExecution(user_proxy)
 
 
-# Use asyncio.run(...) if you are running this in a script.
+    # Make sure to write .agent since apiAgent is a class object
+    user_proxy.initiate_chat(
+        apiAgent.agent,
+        message="I would like to get some healthcare advice.",
+        llm_config=config
+    )
 asyncio.run(run_team_stream())
