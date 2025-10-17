@@ -1,6 +1,8 @@
-from autogen import AssistantAgent, LLMConfig, UserProxyAgent
+from autogen import LLMConfig, UserProxyAgent
 from typing import List
 from langchain.tools import BaseTool
+from autogen_ext.models.openai import OpenAIChatCompletionClient
+from autogen.agentchat import ConversableAgent
 
 def generate_llm_config(tool: BaseTool):
     args_schema = tool.args_schema.model_json_schema() if hasattr(tool, "args_schema") else {}
@@ -16,11 +18,11 @@ class BaseAgent:
         self.name = name
         self.system_message = system_message
         self.tools = tools
-        self.tools_config = self.toolsConfig()
+        self.tools_config = self.getToolsConfig()
         self.config = self.getConfig()
         self.agent = self.createAgent()
     
-    def toolsConfig(self):
+    def getToolsConfig(self):
         tools_config = []
         for tool in self.tools:
             tools_config.append(generate_llm_config(tool))
@@ -37,7 +39,7 @@ class BaseAgent:
         return config
     
     def createAgent(self):
-        return AssistantAgent(
+        return ConversableAgent(
             name = self.name,
             llm_config = self.config,
             system_message = self.system_message
