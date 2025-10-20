@@ -39,7 +39,7 @@ class APITool(BaseTool):
             response.raise_for_status()
             
             # The first resource, with many articles about that subject. Currently hardcoded, will fix when I have a better idea.
-            result = response.json()['Result']['Resources']['All']['Resource'][0]
+            result = response.json()['Result']['Resources']['All']['Resource'][0]['Sections']['section'][0]
             
             return result
         except requests.exceptions.RequestException as e:

@@ -13,12 +13,14 @@ class APIAgent(BaseAgent):
             You are a healthcare professional. When prompted, you must use the APITool tool to answer any question
             about healthcare tips and advice. Do not answer directly. Always use the tool first.
             When you use the tool, only return the output of the tool.
+            After providing the answer, say 'TERMINATE' to end the conversation.
             """
+        self.tools = [APITool()]
         
         super().__init__(
             name = self.name,
             system_message = self.system_message,
-            tools = [APITool()]
+            tools = self.tools
         )
 
 if __name__ == "__main__":    

@@ -61,6 +61,8 @@ apiAgent.agent.llm_config = llm_config
 dbAgent = DBAgent(DatabaseConnection)
 dbAgent.agent.llm_config = llm_config
 
+apiAgent.registerExecution(orchestratorAgent)
+
 apiHandoffPrompt = """The user is asking for general healthcare advice, trying to determine the cause of a health
 related issue, or asking for the cost of a medication."""
 
@@ -93,7 +95,7 @@ agent_pattern = AutoPattern(
 
 result, final_context, last_agent = initiate_group_chat(
     pattern=agent_pattern,
-    messages="I have a headache and a fever what should i do?",
+    messages="I am a 55 year old pregnant woman who smokes, can you give me some healthcare advice?",
     max_rounds=10,
 )
 
