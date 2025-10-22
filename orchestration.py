@@ -62,6 +62,7 @@ dbAgent = DBAgent(DatabaseConnection)
 dbAgent.agent.llm_config = llm_config
 
 apiAgent.registerExecution(orchestratorAgent)
+dbAgent.registerExecution(orchestratorAgent)
 
 apiHandoffPrompt = """The user is asking for general healthcare advice, trying to determine the cause of a health
 related issue, or asking for the cost of a medication."""
