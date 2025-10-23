@@ -34,7 +34,7 @@ from autogen.agentchat.group.patterns import(
     RoundRobinPattern,
 
 )
-from apiAgent import APIAgent
+from adviceAgent import AdviceAgent
 from dbAgent import DBAgent, DatabaseConnection
 
 config = LLMConfig.from_json(path = "OAI_CONFIG_LIST.json")
@@ -45,7 +45,7 @@ orchestratorMessage = """You are an orchestrator agent for a healthcare clinic a
       the user and the other assistant agents. Do not answer the users questions yourself, you must always hand off to 
        another agent. Any questions the user has about their insurance provider,
       medical history, or appointments should be directed to the dbAgent. Any questions about clinic services,
-      health tips, or general medical inquiries should be directed to the apiAgent.
+      health tips, or general medical inquiries should be directed to the adviceAgent.
       """
 
 orchestratorAgent = ConversableAgent(
@@ -56,15 +56,15 @@ orchestratorAgent = ConversableAgent(
     human_input_mode= "TERMINATE"
 )
 
-apiAgent = APIAgent()
-apiAgent.agent.llm_config = llm_config
+adviceAgent = AdviceAgent()
+adviceAgent.agent.llm_config = llm_config
 dbAgent = DBAgent(DatabaseConnection)
 dbAgent.agent.llm_config = llm_config
 
-apiAgent.registerExecution(orchestratorAgent)
+adviceAgent.registerExecution(orchestratorAgent)
 dbAgent.registerExecution(orchestratorAgent)
 
-apiHandoffPrompt = """The user is asking for general healthcare advice, trying to determine the cause of a health
+adviceHandoffPrompt = """The user is asking for general healthcare advice, trying to determine the cause of a health
 related issue, or asking for the cost of a medication."""
 
 dbHandoffPrompt = """The user is asking about their medical history, past appointments, healthcare provider,
@@ -73,8 +73,8 @@ dbHandoffPrompt = """The user is asking about their medical history, past appoin
 
 orchestratorAgent.handoffs.add_llm_conditions([
         OnCondition(
-            target=AgentTarget(apiAgent),
-            condition=StringLLMCondition(prompt= apiHandoffPrompt),
+            target=AgentTarget(adviceAgent),
+            condition=StringLLMCondition(prompt= adviceHandoffPrompt),
         ),
         OnCondition(
             target=AgentTarget(dbAgent),
@@ -88,7 +88,7 @@ user = ConversableAgent(name="user", human_input_mode="ALWAYS")
 
 # Create the pattern
 agent_pattern = AutoPattern(
-  agents=[orchestratorAgent, apiAgent.agent, dbAgent.agent],
+  agents=[orchestratorAgent, adviceAgent.agent, dbAgent.agent],
   initial_agent= orchestratorAgent,
   group_manager_args={"llm_config": llm_config},
   user_agent=user
