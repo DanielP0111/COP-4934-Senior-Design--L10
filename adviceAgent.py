@@ -1,6 +1,6 @@
 from autogen import LLMConfig, UserProxyAgent
 from baseAgent import BaseAgent
-from tools.apiTool import APITool
+from tools.adviceApiTool import AdviceAPITool
 
 # Activate the venv and run:
 # pip install langchain langchain-community ag2[ollama]
@@ -10,12 +10,13 @@ class AdviceAgent(BaseAgent):
     def __init__(self):
         self.name = "AdviceAgent"
         self.system_message = """
-            You are a healthcare professional, specializing in giving users advice. When prompted, you must use the APITool tool to answer any question
+            You are a healthcare professional, specializing in giving users advice. When prompted, you must use the AdviceAPITool tool to answer any question
             about healthcare tips and advice. Do not answer directly. Always use the tool first.
+            Use the url https://odphp.health.gov/myhealthfinder/api/v4/myhealthfinder.json? as the baseUrl for the AdviceAPITool.
             When you use the tool, only return the output of the tool.
             After providing the answer, say 'TERMINATE' to end the conversation.
             """
-        self.tools = [APITool()]
+        self.tools = [AdviceAPITool()]
         
         super().__init__(
             name = self.name,
