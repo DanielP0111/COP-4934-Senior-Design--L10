@@ -17,7 +17,7 @@ class DiagnosisAPIToolInput(BaseAPIToolInput):
 class DiagnosisAPITool(BaseAPITool):
     name: str = "DiagnosisAPITool"
     description: str = (
-        "Use this tool when you need to access an API. "
+        "Use this tool when you need to tell a user about a diagnosis. "
         "Provide baseUrl (optional) and any of the following parameters: "
         "terms."
     )

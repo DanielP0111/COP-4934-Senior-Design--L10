@@ -18,7 +18,7 @@ class AdviceAPIToolInput(BaseAPIToolInput):
 class AdviceAPITool(BaseAPITool):
     name: str = "APITool"
     description: str = (
-        "Use this tool when you need to access an API. "
+        "Use this tool when you need to receive healthcare information. "
         "Provide baseUrl (optional) and any of the following parameters: "
         "age, sex, pregnant, sexuallyActive, tobaccoUse."
     )
