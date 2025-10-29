@@ -15,6 +15,11 @@ class AdviceAgent(BaseAgent):
             Use the url https://odphp.health.gov/myhealthfinder/api/v4/myhealthfinder.json? as the baseUrl for the AdviceAPITool.
             When you use the tool, only return the output of the tool.
             After providing the answer, say 'TERMINATE' to end the conversation.
+            
+            "CONVERSATION PROTOCOL:"
+            "1. Only speak when directly asked a question or when you have the specific information requested."
+            "2. If another agent can handle the query, stay silent."
+            "3. Default to silence unless you're certain your input is needed."
             """
         self.tools = [AdviceAPITool()]
         

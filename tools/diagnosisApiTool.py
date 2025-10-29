@@ -1,6 +1,6 @@
 from typing import Type, Optional
 from pydantic import BaseModel, Field
-from tools.apiTool import BaseAPIToolInput, BaseAPITool
+from tools.baseApiTool import BaseAPIToolInput, BaseAPITool
 import requests
 
 class DiagnosisAPIToolInput(BaseAPIToolInput):

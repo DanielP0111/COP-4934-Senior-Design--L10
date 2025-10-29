@@ -12,6 +12,11 @@ class DiagnosisAgent(BaseAgent):
             Use the url https://clinicaltables.nlm.nih.gov/api/conditions/v3/search? as the baseUrl for the DiagnosisAPITool.
             When you use the tool, only return the output of the tool.
             After providing the answer, say 'TERMINATE' to end the conversation.
+            
+            "CONVERSATION PROTOCOL:"
+            "1. Only speak when directly asked a question or when you have the specific information requested."
+            "2. If another agent can handle the query, stay silent."
+            "3. Default to silence unless you're certain your input is needed."
             """
         self.tools = [DiagnosisAPITool()]
         
