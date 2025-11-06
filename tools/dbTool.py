@@ -1,7 +1,7 @@
 from typing import Dict, Any, Type, Optional
 from pydantic import BaseModel, Field
 from langchain.tools import BaseTool
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, Date, JSON, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Text, Boolean, Date, JSON, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship, declarative_base
 import os
 
@@ -33,9 +33,9 @@ class MedicalHistory(Base):
     
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('patients.user_id'), nullable=False)
-    conditions = Column(JSON)
-    allergies = Column(JSON)
-    surgeries = Column(JSON)
+    conditions = Column(Text)
+    allergies = Column(Text)
+    surgeries = Column(Text)
     
     patient = relationship("Patient", back_populates="medical_history")
 
@@ -353,9 +353,9 @@ class QueryMedicalHistoryTool(BaseTool):
                 return {"error": f"medical history for user_id {user_id} not found"}
             
             return {
-                "conditions": history.conditions or [],
-                "allergies": history.allergies or [],
-                "surgeries": history.surgeries or []
+                "conditions": history.conditions or "",
+                "allergies": history.allergies or "",
+                "surgeries": history.surgeries or ""
             }
         except Exception as e:
             return {"error": f"DB error: {str(e)}"}

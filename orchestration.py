@@ -44,7 +44,7 @@ def initOrchestrator(assistants: [BaseAgent]):
 
 # Can't think of a better way right now.
 adviceAgent = initAssistant(AdviceAgent)
-dbAgent = initAssistant(DBAgent, DatabaseConnection)
+dbAgent = initAssistant(DBAgent, DatabaseConnection())
 
 assistants = [adviceAgent, dbAgent]
 
