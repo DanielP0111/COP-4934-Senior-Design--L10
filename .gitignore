@@ -176,3 +176,6 @@ cython_debug/
 # ollama volumes
 ollama_data
 data
+
+# mysql volumes
+mysql-data
