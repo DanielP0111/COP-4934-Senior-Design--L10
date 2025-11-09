@@ -1,0 +1,70 @@
+services:
+  ubuntu:
+    image: ubuntu:latest
+    container_name: ubuntu-container
+    command: sleep infinity
+    networks:
+      - billnet
+
+  mysql:
+    image: docker.io/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: pass
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    networks:
+      - billnet
+
+  python-app:
+    image: python:3.11-slim
+    container_name: python-container
+    command: sleep infinity
+    volumes:
+      - ./agentscripts:/app/agentscripts
+    networks:
+      - billnet
+    depends_on:
+      - mysql
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=root
+      - DB_PASS=pass
+      - DB_NAME=billdb
+      - DATABASE_URL=mysql+pymysql://root:pass@mysql:3306/billdb
+
+  alpine-python:
+    image: python:3.11-alpine
+    container_name: alpine-python
+    command: sleep infinity
+    volumes:
+      - ./agentscripts:/app/agentscripts
+    networks:
+      - billnet
+    depends_on:
+      - ai-mock
+
+  ai-mock:
+    build:
+      context: ./docker/mock
+    container_name: ai-mock
+    networks:
+      - billnet
+
+  nginx-proxy:
+    image: nginx:1.25-alpine
+    container_name: nginx-proxy
+    ports:
+      - "11435:11434"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - billnet
+    depends_on:
+      - ai-mock
+      - python-app
+
+networks:
+  billnet:
+    driver: bridge
