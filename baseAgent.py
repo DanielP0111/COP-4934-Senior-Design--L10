@@ -14,8 +14,9 @@ def generate_llm_config(tool: BaseTool):
     return {"function": function_schema}
 
 class BaseAgent:
-    def __init__(self, name: str, system_message: str, tools: List[BaseTool]):
+    def __init__(self, name: str, description: str, system_message: str, tools: List[BaseTool]):
         self.name = name
+        self.description = description
         self.system_message = system_message
         self.tools = tools
         self.tools_config = self.getToolsConfig()

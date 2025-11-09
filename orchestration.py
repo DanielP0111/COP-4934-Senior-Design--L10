@@ -37,50 +37,47 @@ def initOrchestrator(assistants: [BaseAgent]):
         human_input_mode="TERMINATE"
     )
     
+    conditions = []
+    
     for assistant in assistants:
         assistant.registerExecution(orchestratorAgent)
         
+        conditions.append(
+            OnCondition(
+                target=AgentTarget(assistant),
+                condition=StringLLMCondition(prompt=assistant.description),
+            )
+        )
+    
+    orchestratorAgent.handoffs.add_llm_conditions(conditions)
+    
     return orchestratorAgent
 
-# Can't think of a better way right now.
-adviceAgent = initAssistant(AdviceAgent)
-dbAgent = initAssistant(DBAgent, DatabaseConnection())
+def orchestrate():
+    # NOTE: Can't think of a better way right now, so new agents need this initialization.
+    adviceAgent = initAssistant(AdviceAgent)
+    dbAgent = initAssistant(DBAgent, DatabaseConnection())
 
-assistants = [adviceAgent, dbAgent]
+    assistants = [adviceAgent, dbAgent]
 
-orchestratorAgent = initOrchestrator(assistants)
+    orchestratorAgent = initOrchestrator(assistants)
 
-adviceHandoffPrompt = """The user is asking for general healthcare advice, trying to determine the cause of a health
-related issue, or asking for the cost of a medication."""
+    user = ConversableAgent(name="user", human_input_mode="ALWAYS")
 
-dbHandoffPrompt = """The user is asking about their medical history, past appointments, healthcare provider,
- or current prescriptions"""
+    # Create the pattern
+    agent_pattern = AutoPattern(
+    agents=[orchestratorAgent] + [a.agent for a in assistants],
+    initial_agent=orchestratorAgent,
+    group_manager_args={"llm_config": LLM_CONFIG},
+    user_agent=user
+    )
 
-# NOTE: This can be modularized further BUT we must add handoffPrompt to BaseAgent and hence every agent.
-orchestratorAgent.handoffs.add_llm_conditions([
-        OnCondition(
-            target=AgentTarget(adviceAgent),
-            condition=StringLLMCondition(prompt=adviceHandoffPrompt),
-        ),
-        OnCondition(
-            target=AgentTarget(dbAgent),
-            condition=StringLLMCondition(prompt=dbHandoffPrompt),
-        )
-    ]
-)
+    result, final_context, last_agent = initiate_group_chat(
+        pattern=agent_pattern,
+        messages="I am a 55 year old pregnant woman who smokes, can you give me some healthcare advice?",
+        max_rounds=10,
+    )
 
-user = ConversableAgent(name="user", human_input_mode="ALWAYS")
-
-# Create the pattern
-agent_pattern = AutoPattern(
-  agents=[orchestratorAgent] + [a.agent for a in assistants],
-  initial_agent=orchestratorAgent,
-  group_manager_args={"llm_config": LLM_CONFIG},
-  user_agent=user
-)
-
-result, final_context, last_agent = initiate_group_chat(
-    pattern=agent_pattern,
-    messages="I am a 55 year old pregnant woman who smokes, can you give me some healthcare advice?",
-    max_rounds=10,
-)
+# Doing it this way since Infra team wants this as a function.
+if __name__ == "__main__":
+    orchestrate()

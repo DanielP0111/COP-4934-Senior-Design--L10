@@ -5,6 +5,7 @@ from tools.diagnosisApiTool import DiagnosisAPITool
 class DiagnosisAgent(BaseAgent):
     def __init__(self):
         self.name = "DiagnosisAgent"
+        self.description = "A diagnosis agent which collects and itemizes synonyms for diagnosis names."
         self.system_message = """
             You are a healthcare professional, specializing in giving users information about their diagonsis. 
             When prompted, you must use the DiagnosisAPITool tool to answer any question about a diagnosis. 

@@ -9,6 +9,7 @@ from tools.adviceApiTool import AdviceAPITool
 class AdviceAgent(BaseAgent):
     def __init__(self):
         self.name = "AdviceAgent"
+        self.description = "An advice agent which collects and summarizes healthcare advice information."
         self.system_message = """
             You are a healthcare professional, specializing in giving users advice. When prompted, you must use the AdviceAPITool tool to answer any question
             about healthcare tips and advice. Do not answer directly. Always use the tool first.

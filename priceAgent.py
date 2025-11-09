@@ -14,6 +14,7 @@ from tools.webParseTool import DrugPriceLookupTool
 class PriceAgent(BaseAgent):
     def __init__(self):
         self.name = "PriceAgent"
+        self.description = "A price agent which finds and summarizes drug price information."
         self.system_message = (
             "You are a medication price agent specialized in finding drug prices from Cost Plus Drugs."
             "You have access to a tool that searches their complete medication database."

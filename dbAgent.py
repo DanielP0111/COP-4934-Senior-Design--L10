@@ -22,6 +22,7 @@ class DBAgent(BaseAgent):
 
     def __init__(self, db_connection: DatabaseConnection):
         self.name = "DBAgent"
+        self.description = "A db agent which collects and informs about a user's basic information, medical history, appointments, and prescriptions."
         self.system_message = (
             "You are a database agent specialized in querying patient healthcare data. "
 
