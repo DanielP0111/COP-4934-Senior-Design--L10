@@ -23,6 +23,7 @@ class DiagnosisAgent(BaseAgent):
         
         super().__init__(
             name = self.name,
+            description = self.description,
             system_message = self.system_message,
             tools = self.tools
         )

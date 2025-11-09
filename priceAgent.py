@@ -43,6 +43,7 @@ class PriceAgent(BaseAgent):
         self.tools = [DrugPriceLookupTool()]
         super().__init__(
             name=self.name,
+            description = self.description,
             system_message=self.system_message,
             tools=self.tools
         )
