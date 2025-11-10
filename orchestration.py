@@ -66,10 +66,10 @@ def orchestrate():
 
     # Create the pattern
     agent_pattern = AutoPattern(
-    agents=[orchestratorAgent] + [a.agent for a in assistants],
-    initial_agent=orchestratorAgent,
-    group_manager_args={"llm_config": LLM_CONFIG},
-    user_agent=user
+        agents=[orchestratorAgent] + [a.agent for a in assistants],
+        initial_agent=orchestratorAgent,
+        group_manager_args={"llm_config": LLM_CONFIG},
+        user_agent=user
     )
 
     result, final_context, last_agent = initiate_group_chat(
