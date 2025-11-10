@@ -32,7 +32,7 @@ def initOrchestrator(assistants: [BaseAgent]):
     orchestratorAgent = ConversableAgent(
         name = "orchestrator",
         system_message = orchestratorMessage,
-        max_consecutive_auto_reply=2,
+        max_consecutive_auto_reply=1,
         llm_config=LLM_CONFIG,
         human_input_mode="TERMINATE"
     )
@@ -62,9 +62,13 @@ def orchestrate():
 
     orchestratorAgent = initOrchestrator(assistants)
 
-    user = ConversableAgent(name="user", human_input_mode="ALWAYS")
+    user = UserProxyAgent(
+        name="user",
+        human_input_mode="TERMINATE",
+        max_consecutive_auto_reply=0,
+        code_execution_config={"use_docker": False},
+    )
 
-    # Create the pattern
     agent_pattern = AutoPattern(
         agents=[orchestratorAgent] + [a.agent for a in assistants],
         initial_agent=orchestratorAgent,
@@ -75,7 +79,7 @@ def orchestrate():
     result, final_context, last_agent = initiate_group_chat(
         pattern=agent_pattern,
         messages="I am a 55 year old pregnant woman who smokes, can you give me some healthcare advice?",
-        max_rounds=10,
+        max_rounds=20,
     )
 
 # Doing it this way since Infra team wants this as a function.
