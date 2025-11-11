@@ -43,7 +43,8 @@ class BaseAgent:
         return ConversableAgent(
             name = self.name,
             llm_config = self.config,
-            system_message = self.system_message
+            system_message = self.system_message,
+            max_consecutive_auto_reply = 3,
         )
 
     def registerExecution(self, user_proxy: UserProxyAgent):

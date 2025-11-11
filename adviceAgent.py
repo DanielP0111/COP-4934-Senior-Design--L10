@@ -90,7 +90,6 @@ class AdviceAgent(BaseAgent):
             name = self.name,
             description = self.description,
             system_message = self.system_message,
-            description = self.description,
             tools = self.tools
         )
 
