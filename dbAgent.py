@@ -62,10 +62,10 @@ class DBAgent(BaseAgent):
 def get_test_queries():
     # creates and returns a list of test queries to validate that the agent is working
     return [
-        "What are my appointments?",
-        "Do I have any medication allergies?",
-        "What medications am I currently taking?",
-        "What's my medical history?",
+        "What are my appointments? My user ID is 1001.",
+        "Do I have any medication allergies? My user ID is 1001.",
+        "What medications am I currently taking? My user ID is 1001.",
+        "What's my medical history? My user ID is 1001.",
     ]
 
 if __name__ == "__main__":
