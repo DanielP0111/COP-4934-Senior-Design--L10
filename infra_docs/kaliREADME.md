@@ -20,7 +20,8 @@ kali:
 ```
 
 - The above code snippet creates a Docker container utilizing the Dockerfile.kali Dockerfile, located in the autogen folder. 
-- The image is named “kali-image” yet utilizes the Dockerfile as the image used upon creation.
+- The image is named “kali-image” yet utilizes the Dockerfile to create the actual full image on startup.
+- The container is simply named “kali-container”
 -  stdin_open: true Stops the container form exiting immediately
 -  tty: true Creates an interactive session with the container, so that it may be accessed as a terminal at any time
 - Lastly, the workstation is placed upon our network, named billnet, so that it may interact with other containers on the network
@@ -46,7 +47,7 @@ RUN apt-get update && \
 WORKDIR /root
 ```
 
-- Inside the Dockerfile, we will simply pull the latest mysql image from docker.io as a baseline. 
+- Inside the Dockerfile, we will simply pull the latest Kali Linux image from docker.io as a baseline. 
 - We then make the workstation noninteractive, so that packet installation may progress without user input
 - As the default image is somewhat barebones, we will use a RUN command to install a few helpful tools on startup.
 
@@ -60,7 +61,7 @@ WORKDIR /root
 - bettercap - Man in the middle toolset
 - sqlmap - SQL injection testing tool
 
-# Accessing the container
+## Accessing the container
 After running the following code to startup all of the containers in the compose file:
 ```bash
 docker compose up -d
@@ -69,4 +70,9 @@ You may enter into the Kali workstation terminal by running the following comman
  ```bash
 docker exec -it kali-linux bash
 ```
+To exit, simply enter:
+```bash
+exit
+```
+
 Once inside the workstation, you may use any of the installed tools as you would normally. Happy hacking!
