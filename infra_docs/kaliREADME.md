@@ -27,10 +27,30 @@ kali:
 
 ## The Dockerfile
 To help us build our Kali-Linux image, we will utilize an associated Dockerfile. This Dockerfile is named “Dockerfile.kali”. 
+```dockerfile
+FROM docker.io/kalilinux/kali-rolling
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    iputils-ping \
+    curl \
+    nmap \
+    net-tools \
+    tshark \
+    ffuf \
+    bettercap \
+    sqlmap
+
+WORKDIR /root
+```
+
 - Inside the Dockerfile, we will simply pull the latest mysql image from docker.io as a baseline. 
+- We then make the workstation noninteractive, so that packet installation may progress without user input
 - As the default image is somewhat barebones, we will use a RUN command to install a few helpful tools on startup.
 
-### Included tools
+### Included Tools
 - iputils-ping - Used to check if an address is reachable
 - curl - Multipurpose tool for data transfer and API testing
 - nmap - Network scanner and recon tool
