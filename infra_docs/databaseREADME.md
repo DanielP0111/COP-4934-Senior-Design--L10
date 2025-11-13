@@ -50,6 +50,8 @@ COPY ./init_database.sql /docker-entrypoint-initdb.d/
 ## The Database Initialization Script 
 This script, named “init_database.sql” is an sql script used to initialize and fill in our database.
 
+<details>
+	<summary>Click here to expand and see init_database.sql!</summary>
 ```sql
 -- Database
 CREATE DATABASE billdb;
@@ -155,6 +157,8 @@ INSERT INTO prescriptions (user_id, medication, dosage, frequency, prescribing_d
 
 (1005, 'Multivitamin', '1 tablet', 'Daily', 'Dr. Kim', '2024-09-01', 10, TRUE);
 ```
+</details>
+
 - Firstly, the main database named “billdb” is created and set to the active database
 - The tables for patients, medical history, appointments, and prescriptions are then created and initialized
 - Lastly, the freshly created tables are then populated with sample dummy data to be utilized by our agentic healthcare chatbot system.
