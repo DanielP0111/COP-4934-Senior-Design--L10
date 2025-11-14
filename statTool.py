@@ -13,6 +13,25 @@ class CodeExecutor(LocalCommandLineCodeExecutor):
                     work_dir=self.temp_dir.name,
                     timeout=timeout
                 )
+
+class pyInput(BaseModel):
+    code: str =  Field(default=None, description="The python code the agent writes")
+
+class pyTool(BaseTool):
+    name: str= "pyTool"
+    description: str = "Use this tool to write and execute python code"
+    args_schema: Type[BaseModel] = pyInput
+    
+    def _run(self, code:str)  -> str:  
+        """
+        Write and execute Python code and return output.
+        """
+        local_vars = {}
+        try:
+            exec(code, {}, local_vars)
+            return str(local_vars.get("result", "Code executed."))
+        except Exception as e:
+            return f"Error during execution: {e}"
     
 class BMIInput(BaseModel):
     height: int =  Field(default=None, description="The user's height in centimeters.")
