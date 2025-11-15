@@ -60,7 +60,7 @@ services:
       - WEBUI_NAME=DocTalk
       - WEBUI_PORT=8080
       - WEBUI_HOST=0.0.0.0
-      - OPENAI_API_BASE_URL=http://python_container:8000/v1
+      - OPENAI_API_BASE_URL=http://agents:8000/v1
       - ENABLE_TITLE_GENERATION=False
       - ENABLE_FOLLOW_UP_GENERATION=False
       - ENABLE_AUTOCOMPLETE_GENERATION=False
