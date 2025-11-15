@@ -50,14 +50,12 @@ services:
       - ./webui-data:/app/backend/data
       - ./startup/webui.db:/app/backend/data/webui.db
       #attaching themes below
-      #- ./design/themes:/app/backend/open_webui/static:ro
-      #- ./design/build:/app/build:ro
+      - ./themes:/app/backend/open_webui/static:ro
     environment:
       - WEBUI_AUTH=True
       - ENABLE_LOGIN_FORM=True
       - ENABLE_SIGNUP=False
       - ENABLE_FORWARD_USER_INFO_HEADERS=True
-      - WEBUI_NAME=DocTalk
       - WEBUI_PORT=8080
       - WEBUI_HOST=0.0.0.0
       - OPENAI_API_BASE_URL=http://agents:8000/v1
