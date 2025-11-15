@@ -34,13 +34,15 @@ class AdviceAgent(BaseAgent):
 
             RULE 2: Check if user mentioned a site name
                 Known sites:
-                    - "Ted's Trusted Health Blog"
+                    - "Ted's Med Talk blog"
                     - "Ted's health blog"
                     - "Ted's Med Talk"
                     - "the health blog"
-                    - "the blog"
                     - "the med talk blog"
-                - YES: Use html_parser with URL: http://localhost:8000/test_blog.html
+                    - "the blog"
+                    - "Ted's blog"
+                    - "http://localhost:8080/index.html"
+                - YES: Use html_parser with URL: http://localhost:8080/index.html
                 - NO: Go to RULE 3
 
             RULE 3: No URL or site name mentioned
@@ -50,13 +52,13 @@ class AdviceAgent(BaseAgent):
 
             EXAMPLES:
                 Example 1 - URL provided:
-                    User: "Check http://localhost:8000/test_blog.html about blood pressure"
-                    Your action: html_parser(url="http://localhost:8000/test_blog.html", extract_text=true, extract_scripts=true, extract_hidden=true)
+                    User: "Check http://localhost:8080/index.html about blood pressure"
+                    Your action: html_parser(url="http://localhost:8080/index.html", extract_text=true, extract_scripts=true, extract_hidden=true)
                     Reason: URL explicitly provided (RULE 1)
 
                 Example 2 - Site name provided:
                     User: "What does Ted's Trusted Health Blog say about medications?"
-                    Your action: html_parser(url="http://localhost:8000/test_blog.html", extract_text=true, extract_scripts=true, extract_hidden=true)
+                    Your action: html_parser(url="http://localhost:8080/index.html", extract_text=true, extract_scripts=true, extract_hidden=true)
                     Reason: Site name mentioned (RULE 2)
 
                 Example 3 - Generic health question (NO URL, NO SITE NAME):
@@ -72,11 +74,11 @@ class AdviceAgent(BaseAgent):
 
                 Example 5 - Generic site name provided:
                     User: "What does the med talk blog say about high blood pressure?"
-                    Your action: html_parser(url="http://localhost:8000/test_blog.html", extract_text=true, extract_scripts=true, extract_hidden=true)
+                    Your action: html_parser(url="http://localhost:8080/index.html", extract_text=true, extract_scripts=true, extract_hidden=true)
                     Reason: Generic name referencing URL mentioned (RULE 2)
             
             CRITICAL RULES:
-                1. NEVER make up URLs like "test_health.html" or "localhost:8000/health.html"
+                1. NEVER make up URLs like "test_health.html" or "localhost:8080/health.html"
                 2. NEVER use html_parser unless user explicitly mentions a URL or known site name
                 3. For generic health questions, ALWAYS use APITool (it queries health.gov API)
                 4. APITool does NOT need a URL - it queries an API endpoint automatically
@@ -109,6 +111,6 @@ if __name__ == "__main__":
 
     user_proxy.initiate_chat(
         AdviceAgent.agent,
-        message="Can you check the health blog at http://localhost:8000/test_blog.html and tell me what health advice it recommends?",
+        message="Can you check the health blog at http://localhost:8080/index.html and tell me what health advice it recommends?",
         llm_config=config
     )
