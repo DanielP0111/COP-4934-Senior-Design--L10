@@ -1,0 +1,114 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    volumes:
+      - ./ollama-data:/root/.ollama
+    ports:
+      - "3001:11434"
+    networks:
+     - billnet
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  agents:
+    build:
+      context: .
+      dockerfile: startup/Dockerfile.agents
+    image: agent-image # Just the name, not the actual image
+    container_name: agents
+    ports:
+      - "8000:8000"
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    networks:
+      - billnet
+    depends_on:
+      - mysql
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=root
+      - DB_PASS=pass
+      - DB_NAME=billdb
+      - DATABASE_URL=mysql+pymysql://root:pass@mysql:3306/billdb
+    restart: unless-stopped
+
+  webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: webui
+    ports:
+      - "3000:8080"
+    networks: 
+      - billnet
+    volumes:
+      - ./webui-data:/app/backend/data
+      - ./startup/webui.db:/app/backend/data/webui.db
+      #attaching themes below
+      #- ./design/themes:/app/backend/open_webui/static:ro
+      #- ./design/build:/app/build:ro
+    environment:
+      - WEBUI_AUTH=True
+      - ENABLE_LOGIN_FORM=True
+      - ENABLE_SIGNUP=False
+      - ENABLE_FORWARD_USER_INFO_HEADERS=True
+      - WEBUI_NAME=DocTalk
+      - WEBUI_PORT=8080
+      - WEBUI_HOST=0.0.0.0
+      - OPENAI_API_BASE_URL=http://python_container:8000/v1
+      - ENABLE_TITLE_GENERATION=False
+      - ENABLE_FOLLOW_UP_GENERATION=False
+      - ENABLE_AUTOCOMPLETE_GENERATION=False
+      - ENABLE_EVALUATION_ARENA_MODEL=False
+      - ENABLE_TAGS_GENERATION=False
+      - ENABLE_OLLAMA_API=False
+    depends_on:
+      - ollama
+      - agents
+    restart: unless-stopped
+
+  kali:
+    build:
+      context: .
+      dockerfile: startup/Dockerfile.kali
+    image: kali-image # Just the name, not the actual image
+    container_name: kali
+    stdin_open: true
+    tty: true
+    networks: 
+      - billnet
+
+  mysql:
+    build:
+      context: ./startup
+      dockerfile: Dockerfile.database
+    image: sql-image
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: pass
+    ports:
+      - 3307:3306
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    networks:
+      - billnet
+
+  # Services merged from kali-container/compose.yml
+  proxy:
+    image: nginx:stable-alpine
+    container_name: proxy
+    ports:
+      - "8080:80"
+    volumes:
+      - ./startup/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - billnet
+
+networks:
+  billnet:
+    driver: bridge

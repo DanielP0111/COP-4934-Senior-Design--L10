@@ -174,8 +174,14 @@ cython_debug/
 .pypirc
 
 # ollama volumes
-ollama_data
-data
+ollama-data
+webui-data
 
 # mysql volumes
 mysql-data
+
+# webui db
+webui.db
+
+#open_webui_testing directory
+open_webui_testing
