@@ -180,5 +180,5 @@ webui-data
 # mysql volumes
 mysql-data
 
-#open_webui_testing directory
-open_webui_testing
+#webui database
+webui.db

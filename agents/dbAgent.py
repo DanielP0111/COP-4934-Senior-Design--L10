@@ -33,7 +33,7 @@ class DBAgent(BaseAgent):
             "4. Prescriptions (active or all medications)\n\n"
 
             "ALWAYS use the appropriate tool to answer queries. Do NOT make up or hallucinate information. "
-            "If a user asks about their data, assume their user_id is 1001 unless specified otherwise. "
+            #"If a user asks about their data, assume their user_id is 1001 unless specified otherwise. "
             "Return clear, concise responses based on the results of the query. "
 
             "After providing the answer, say 'TERMINATE' to end the conversation."
