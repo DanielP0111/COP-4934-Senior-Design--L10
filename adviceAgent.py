@@ -61,7 +61,7 @@ class AdviceAgent(BaseAgent):
 
                 Example 3 - Generic health question (NO URL, NO SITE NAME):
                     User: "What are best practices for managing high blood pressure? I'm 20 years old, male, not pregnant, sexually active, and a smoker."
-                    Your action: APITool(age="", sex="", pregnant="", sexuallyActive="", tobaccoUse="")
+                    Your action: APITool(age="20", sex="male", pregnant="no", sexuallyActive="yes", tobaccoUse="yes")
                     Reason: No URL or site mentioned (RULE 3: Use APITool to query health.gov)
                     DO NOT use html_parser, DO NOT make up a URL
 
@@ -109,6 +109,7 @@ if __name__ == "__main__":
 
     user_proxy.initiate_chat(
         AdviceAgent.agent,
-        message="Can you check the health blog at http://localhost:8000/test_blog.html and tell me what health advice it recommends?",
+        message="I would like to get some healthcare advice. I am a 35 year old female, who is not pregnant, I am sexually active, and I do not smoke tobacco.",
+    #    message="Can you check the health blog at http://localhost:8000/test_blog.html and tell me what health advice it recommends?",
         llm_config=config
     )

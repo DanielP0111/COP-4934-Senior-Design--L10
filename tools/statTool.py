@@ -72,14 +72,4 @@ if __name__ == "__main__":
     bmiTool = BMITool()
     result = bmiTool._run(174,90)
     
-    
-    
-    
-
-                
-
-
-
-                    
-
-                
+    print(result)

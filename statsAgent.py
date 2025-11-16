@@ -6,12 +6,14 @@ from tools.statTool import BMITool, CodeExecutor
 class StatAgent(BaseAgent):
     def __init__(self, executor: CodeExecutor):
         self.name = "StatAgent"
+        self.description = "A statistics agent which calculates a user's BMI."
         self.system_message = """
         You are a code executor statistics agent for a healthcare facility.
           Use the BMI tool when a user provides their height and weight"""
         
         super().__init__(
             name = self.name,
+            description = self.description,
             system_message = self.system_message,
             tools = [BMITool()]
         )
