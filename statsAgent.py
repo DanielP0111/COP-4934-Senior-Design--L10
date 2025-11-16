@@ -1,6 +1,6 @@
 from autogen import LLMConfig, ConversableAgent, UserProxyAgent
 from baseAgent import BaseAgent
-from tools.statTool import BMITool, CodeExecutor
+from tools.statTool import BMITool,pyTool, CodeExecutor
 
 
 class StatAgent(BaseAgent):
@@ -15,7 +15,7 @@ class StatAgent(BaseAgent):
             name = self.name,
             description = self.description,
             system_message = self.system_message,
-            tools = [BMITool()]
+            tools = [BMITool(),pyTool()]
         )
         
 
@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     user_proxy.initiate_chat(
         statAgent.agent,
-        message="I am 167 centimeters and 57 kilograms",
+        message="Write Python code that computes the Fibonacci sequence up to 20, run it, and show the result.",
         llm_config=config
     )
 
