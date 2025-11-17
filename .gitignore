@@ -178,3 +178,7 @@ cython_debug/
 .pypirc
 *_output.txt
 .DS_Store
+
+webui-data
+ollama-data
+mysql-data
