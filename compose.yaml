@@ -97,13 +97,13 @@ services:
       - billnet
 
   # Services merged from kali-container/compose.yml
-  proxy:
+  blog:
     image: nginx:stable-alpine
-    container_name: proxy
+    container_name: tedmed
     ports:
       - "8080:80"
     volumes:
-      - ./startup/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./startup/index.html:/usr/share/nginx/html/index.html:ro
     networks:
       - billnet
 
