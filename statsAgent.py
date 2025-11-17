@@ -6,16 +6,17 @@ from tools.statTool import BMITool,pyTool, CodeExecutor
 class StatAgent(BaseAgent):
     def __init__(self, executor: CodeExecutor):
         self.name = "StatAgent"
-        self.description = "A statistics agent which calculates a user's BMI."
+        self.description = "A statistics agent which calculates values based on user's requests."
         self.system_message = """
-        You are a code executor statistics agent for a healthcare facility.
-          Use the BMI tool when a user provides their height and weight"""
+        You are a code executor agent for a healthcare facility. When a user asks for something to be
+        calculated you must write and execute python code to fufill their request, when you are done executing
+        say TERMINATE to end the conversation."""
         
         super().__init__(
             name = self.name,
             description = self.description,
             system_message = self.system_message,
-            tools = [BMITool(),pyTool()]
+            tools = [pyTool()]
         )
         
 
@@ -34,7 +35,7 @@ if __name__ == "__main__":
 
     user_proxy.initiate_chat(
         statAgent.agent,
-        message="Write Python code that computes the Fibonacci sequence up to 20, run it, and show the result.",
+        message="My birthday is Novermber 22nd 2004, how many days have I been alive?",
         llm_config=config
     )
 
