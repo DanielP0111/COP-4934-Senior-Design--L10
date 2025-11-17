@@ -1,8 +1,8 @@
-# agentic-ai-security
-COP-4934-Senior-Design--L10. This repo is for group L10 of UCF's senior design 1 class. We will be working on security concerns in agentic AI systems
+# Security Concerns in Agentic AI
+COP-4934-Senior-Design--L10. This repo is for group L10 of UCF's senior design 1 class. We will be working on security concerns in agentic AI systems.
 
-##Podman Web Server Set Up
-1. podman build -t image-name .
-2. podman create --name container-name -p 8080:80 image-name
-3. podman start container-name
-4. podman stop container-name
+## DocTalk - Our Agentic System 
+We built an agentic AI healthcare system called DocTalk!
+
+## How can I run DocTalk?
+Navigate to the Jupyter Notebook labeled `system-setup.ipynb` for further instructions
