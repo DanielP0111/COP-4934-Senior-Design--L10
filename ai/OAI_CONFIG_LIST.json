@@ -1,9 +1,9 @@
 [
     {
-        "model": "qwen2.5:3b",
+        "model": "qwen2.5:14b",
         "api_type": "openai",
         "api_key": "ollama",
-        "base_url": "http://localhost:11434/v1",
+        "base_url": "http://ollama:11434/v1",
         "temperature": 0.3,
         "tool_choice": "required",
         "price": [0.0, 0.0]
