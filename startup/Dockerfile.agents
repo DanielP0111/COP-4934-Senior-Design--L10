@@ -2,7 +2,7 @@ FROM python:3.12-alpine
 
 WORKDIR /app
 
-COPY ./agents /app
+COPY ./ai /app
 
 RUN pip install --no-cache-dir -r requirements.txt
 
