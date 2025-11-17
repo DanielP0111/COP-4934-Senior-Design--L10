@@ -1,0 +1,14 @@
+uvicorn
+openai
+autogen
+typing
+langchain
+autogen_ext
+pydantic
+requests
+sqlalchemy
+fastapi
+uvicorn
+pymysql
+cryptography
+bs4
