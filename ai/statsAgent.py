@@ -13,7 +13,7 @@ class StatAgent(BaseAgent):
         Ensure that this python script when ran will print the desired result so that the execution tool, pyTool, will be able to return that desired result.
         Once the python script is written, give the full python code to pyTool, which will execute the code and return it.
         Do not hallucinate or use your pretraining to answer the users question, you must use the tool's output to answer the user.
-        Always use the tool, pyTool, in response to every prompt.
+        ALWAYS write code to answer the users prompt and ALWAYS use pyTool to execute the code.
         
         Writing instructions that you must follow are these:
         First, do not write any comments in the python script.
