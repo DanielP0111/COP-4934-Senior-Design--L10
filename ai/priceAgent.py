@@ -32,12 +32,8 @@ class PriceAgent(BaseAgent):
             "Present prices clearly: both per-unit and total package price"
             "Include the URL so users can view more details"
 
-            "After providing the price information, say 'TERMINATE' to end the conversation."
+            "Once you give the user the result from the tool, terminate the conversation and do not say anything until the user prompts you again."
 
-            "CONVERSATION PROTOCOL:"
-            "1. Only speak when directly asked a question or when you have the specific information requested."
-            "2. If another agent can handle the query, stay silent."
-            "3. Default to silence unless you're certain your input is needed."
         )
 
         self.tools = [DrugPriceLookupTool()]

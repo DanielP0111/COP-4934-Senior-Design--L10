@@ -22,6 +22,8 @@ class StatAgent(BaseAgent):
         Fourth, ALWAYS verify the code was written properly to get the desired result for the user and so the other rules were followed exactly as described.
         
         Once you give the user the result from the tool, terminate the conversation and do not say anything until the user prompts you again.
+
+        Repeat your last response until the user gives you a new instruction, asks a question, or any other non-empty response.
         """
         
         super().__init__(
@@ -50,8 +52,3 @@ if __name__ == "__main__":
         message="My birthday is Novermber 22nd 2004, how many days have I been alive?",
         llm_config=config
     )
-
-
-
-
-   

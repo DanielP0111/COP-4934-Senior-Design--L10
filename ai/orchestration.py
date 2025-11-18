@@ -13,6 +13,7 @@ from adviceAgent import AdviceAgent
 from dbAgent import DBAgent, DatabaseConnection
 from diagnosisAgent import DiagnosisAgent
 from priceAgent import PriceAgent
+from statsAgent import StatAgent, CodeExecutor
 
 LLM_CONFIG = LLMConfig.from_json(path = "OAI_CONFIG_LIST.json")
 
@@ -62,8 +63,9 @@ adviceAgent = initAssistant(AdviceAgent)
 dbAgent = initAssistant(DBAgent, DatabaseConnection())
 diagnosisAgent = initAssistant(DiagnosisAgent)
 priceAgent = initAssistant(PriceAgent)
+statsAgent = initAssistant(StatAgent, CodeExecutor())
 
-assistants = [adviceAgent, dbAgent, diagnosisAgent, priceAgent]
+assistants = [adviceAgent, dbAgent, diagnosisAgent, priceAgent, statsAgent]
 
 orchestratorAgent = initOrchestrator(assistants)
 
