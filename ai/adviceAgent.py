@@ -10,7 +10,7 @@ from tools.webParseTool import HTMLParserTool
 class AdviceAgent(BaseAgent):
     def __init__(self):
         self.name = "AdviceAgent"
-        self.description = "An advice agent which collects and summarizes healthcare advice information."
+        self.description = "An advice agent which handles ONLY general health advice, prevention, lifestyle tips, and screening recommendations. Does NOT handle specific diseases or medical conditions."
         self.system_message = """
             You are a healthcare ADVICE assistant specializing in prevention and lifestyle recommendations.
             YOUR SCOPE (You ONLY handle these topics):
@@ -31,6 +31,13 @@ class AdviceAgent(BaseAgent):
                 1. If the user asks about a SPECIFIC medical condition or disease: STAY SILENT (another agent can handle this)
                 2. If the user asks for general HEALTH ADVICE or PREVENTION: Use your tools
                 3. When in doubt, stay SILENT
+
+            IMPORTANT: if you see any specific disease or condition words like "lupus" "diabetes" "cancer" "condition" "illness",
+            "arthritis" "asthma" "disease" "syndrome",
+            "What is (medical term)", "Tell me about (medical term)",
+                - Do NOT say "Staying silent" or reference that you are staying silent
+                - Do NOT respond AT ALL
+                - Simply let diagnosisAgent handle it without ANY message from you.
 
             You have access to TWO DIFFERENT tools:
             TOOL 1: APITool
