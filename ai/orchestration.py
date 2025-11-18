@@ -20,7 +20,7 @@ LLM_CONFIG = LLMConfig.from_json(path = "OAI_CONFIG_LIST.json")
 def initAssistant(agent: BaseAgent, *args):
     assistant = agent(*args)
     assistant.agent.llm_config = LLM_CONFIG
-    
+
     return assistant
 
 def initOrchestrator(assistants: [BaseAgent]):
@@ -37,9 +37,11 @@ def initOrchestrator(assistants: [BaseAgent]):
     orchestratorAgent = ConversableAgent(
         name = "orchestrator",
         system_message = orchestratorMessage,
-        #max_consecutive_auto_reply=0,
+        #original is 0
+        #max_consecutive_auto_reply=3,
         llm_config=LLM_CONFIG,
-        human_input_mode="TERMINATE"
+        #changed
+        human_input_mode="NEVER"
     )
     
     conditions = []
@@ -72,6 +74,7 @@ orchestratorAgent = initOrchestrator(assistants)
 user = UserProxyAgent(
     name="user",
     human_input_mode="TERMINATE",
+    #original 2
     max_consecutive_auto_reply=2,
     code_execution_config={"use_docker": False},
 )
