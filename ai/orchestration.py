@@ -40,7 +40,6 @@ def initOrchestrator(assistants: [BaseAgent]):
         #original is 0
         #max_consecutive_auto_reply=3,
         llm_config=LLM_CONFIG,
-        #changed
         human_input_mode="NEVER"
     )
     
@@ -60,7 +59,6 @@ def initOrchestrator(assistants: [BaseAgent]):
     
     return orchestratorAgent
 
-# NOTE: Can't think of a better way right now, so new agents need this initialization.
 adviceAgent = initAssistant(AdviceAgent)
 dbAgent = initAssistant(DBAgent, DatabaseConnection())
 diagnosisAgent = initAssistant(DiagnosisAgent)
@@ -74,7 +72,6 @@ orchestratorAgent = initOrchestrator(assistants)
 user = UserProxyAgent(
     name="user",
     human_input_mode="TERMINATE",
-    #original 2
     max_consecutive_auto_reply=2,
     code_execution_config={"use_docker": False},
 )
@@ -94,6 +91,6 @@ def orchestrate(message: str):
     )
     return result
 
-# Doing it this way since Infra team wants this as a function.
 if __name__ == "__main__":
-    orchestrate()
+    message = "I am a 55 year old pregnant woman who smokes, can you give me some healthcare advice?"
+    orchestrate(message)

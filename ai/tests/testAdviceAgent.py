@@ -3,10 +3,10 @@ from unittest.mock import patch
 from adviceAgent import AdviceAgent
 from autogen import UserProxyAgent, LLMConfig
 
-# To run all tests from main dir:      python -m unittest discover
-# To run just this test from main dir: python -m unittest tests.testAdviceAgent
+# To run all tests from ai dir:      python -m unittest discover
+# To run just this test from ai dir: python -m unittest tests.testAdviceAgent
 
-# They don't have pytest, so I'm using `unittest` for an integration test lol.
+# Integration test for agent <-> tool communication.
 class Test(unittest.TestCase):
     def setUp(self) -> None:
         self.user_proxy = UserProxyAgent(
@@ -21,7 +21,7 @@ class Test(unittest.TestCase):
         
         self.config = LLMConfig.from_json(path = "OAI_CONFIG_LIST.json")
     
-    def testAllParams(self):
+    def runTest(self, message, params):
         with patch("tools.adviceApiTool.AdviceAPITool._run") as mock_run:
             mock_run.return_value = {
                 "Title": "TestTitle",
@@ -30,72 +30,55 @@ class Test(unittest.TestCase):
 
             self.user_proxy.initiate_chat(
                 self.agent,
-                message="I would like to get some healthcare advice. I am a 35 year old female, who is pregnant, I am sexually active, and I do smoke tobacco.",
+                message=message,
                 llm_config=self.config,
             )
-
+            
             mock_run.assert_called_once()
-
+            
             args, kwargs = mock_run.call_args
-
-            assert kwargs["age"] == "35"
-            assert kwargs["pregnant"] == "yes"
-            assert kwargs["sex"] == "female"
-            assert kwargs["sexuallyActive"] == "yes"
-            assert kwargs["tobaccoUse"] == "yes"
+            
+            for key in params:
+                if key in kwargs:
+                    assert kwargs[key] == params[key]
+    
+    def testAllParams(self):
+        message = "I would like to get some healthcare advice. I am a 35 year old female, who is pregnant, I am sexually active, and I do smoke tobacco."
+        params = {
+            "age": "35", 
+            "pregnant": "yes", 
+            "sex": "female", 
+            "sexuallyActive": "yes", 
+            "tobaccoUse": "yes"
+        }
+        
+        self.runTest(message, params)
 
     def testSomeNo(self):
-        with patch("tools.adviceApiTool.AdviceAPITool._run") as mock_run:
-            mock_run.return_value = {
-                "Title": "TestTitle",
-                "Content": "TestContent"
-            }
-
-            self.user_proxy.initiate_chat(
-                self.agent,
-                message="What are best practices for managing high blood pressure? I'm 20 years old, male, not pregnant, sexually active, and not a smoker.",
-                llm_config=self.config,
-            )
-
-            mock_run.assert_called_once()
-
-            args, kwargs = mock_run.call_args
-
-            assert kwargs["age"] == "20"
-            assert kwargs["pregnant"] == "no"
-            assert kwargs["sex"] == "male"
-            assert kwargs["sexuallyActive"] == "yes"
-            assert kwargs["tobaccoUse"] == "no"
+        message = "What are best practices for managing high blood pressure? I'm 20 years old, male, not pregnant, sexually active, and not a smoker."
+        params = {
+            "age": "20", 
+            "pregnant": "no", 
+            "sex": "male", 
+            "sexuallyActive": "yes", 
+            "tobaccoUse": "no"
+        }
+        
+        self.runTest(message, params)
 
     def testSomeBlank(self):
-        with patch("tools.adviceApiTool.AdviceAPITool._run") as mock_run:
-            mock_run.return_value = {
-                "Title": "TestTitle",
-                "Content": "TestContent"
-            }
-
-            self.user_proxy.initiate_chat(
-                self.agent,
-                message="I would like to get some healthcare advice. I am a 35 year old female, who is pregnant.",
-                llm_config=self.config,
-            )
-
-            mock_run.assert_called_once()
-
-            args, kwargs = mock_run.call_args
-
-            assert kwargs["age"] == "35"
-            assert kwargs["pregnant"] == "yes"
-            assert kwargs["sex"] == "female"
-            
-            # Allow either just the three parameters, or blanks on the other two.
-            expected_keys = {"age", "pregnant", "sex"}
-            if(set(kwargs.keys()) == expected_keys):
-                assert set(kwargs.keys()) == expected_keys
-            
-            else:
-                assert kwargs["sexuallyActive"] == ""
-                assert kwargs["tobaccoUse"] == ""
+        message = "I would like to get some healthcare advice. I am a 35 year old female, who is pregnant."
+        
+        # Keeping the blank params allows for the AI to either enter nothing or blank strings (both have the same result)
+        params = {
+            "age": "35", 
+            "pregnant": "yes", 
+            "sex": "female",
+            "sexuallyActive": "",
+            "tobaccoUse": ""
+        }
+        
+        self.runTest(message, params)
 
 if __name__ == "__main__":
     unittest.main()

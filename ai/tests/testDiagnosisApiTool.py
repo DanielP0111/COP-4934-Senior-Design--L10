@@ -1,8 +1,8 @@
 import unittest
 from tools.diagnosisApiTool import DiagnosisAPITool, DiagnosisAPIToolInput
 
-# To run all tests from main dir:      python -m unittest discover
-# To run just this test from main dir: python -m unittest tests/testDiagnosisApiTool.py
+# To run all tests from ai dir:      python -m unittest discover
+# To run just this test from ai dir: python -m unittest tests/testDiagnosisApiTool.py
 
 class Test(unittest.TestCase):
     def setUp(self) -> None:

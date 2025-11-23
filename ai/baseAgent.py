@@ -45,7 +45,6 @@ class BaseAgent:
             llm_config = self.config,
             system_message = self.system_message,
             max_consecutive_auto_reply = 3,
-            #added to fix
             human_input_mode = "NEVER"
         )
 
