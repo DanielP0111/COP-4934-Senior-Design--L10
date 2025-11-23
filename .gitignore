@@ -1,3 +1,6 @@
+#All Docs excluded
+ai/docs/
+infra_docs/
 
 # venv folder name
 autogen/
