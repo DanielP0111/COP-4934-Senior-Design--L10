@@ -3,8 +3,8 @@ from unittest.mock import patch
 from adviceAgent import AdviceAgent
 from autogen import UserProxyAgent, LLMConfig
 
-# To run all tests from ai dir:      python -m unittest discover
-# To run just this test from ai dir: python -m unittest tests.testAdviceAgent
+# To run all tests from ai dir:        python -m unittest discover
+# To run just these tests from ai dir: python -m unittest tests.testAdviceAgent
 
 # Integration test for agent <-> tool communication.
 class Test(unittest.TestCase):

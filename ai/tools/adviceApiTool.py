@@ -34,12 +34,19 @@ class AdviceAPITool(BaseAPITool):
 if __name__ == "__main__":
     apiTool = AdviceAPITool()
 
+#    query = AdviceAPIToolInput(
+#        age="35",
+#        sex="female",
+#        pregnant="no",
+#        sexuallyActive="yes",
+#        tobaccoUse="no"
+#    )
+
+    # Same response, since the other two are implied. Here for testing purposes.
     query = AdviceAPIToolInput(
-        age="35",
-        sex="female",
-        pregnant="no",
-        sexuallyActive="yes",
-        tobaccoUse="no"
+        age="35", 
+        pregnant="yes", 
+        sex="female"
     )
 
     result = apiTool._run(**query.model_dump())
