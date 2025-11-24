@@ -2,6 +2,7 @@
 COP-4934-Senior-Design--L10. This repo is for group L10 of UCF's Senior Design 1 class. We will be working on security concerns in agentic AI systems in conjunction with the Georgia Tech Research Institute (GTRI).
 
 <img src="./themes/favicon.png" alt="DocTalk Logo" width="150" height="150">
+
 ## DocTalk - Our Agentic System 
 To test the security posture of agentic AI systems, we built one of our own. DocTalk is an agentic AI system built for Bill's Clinic (a fictional clinic named after GTRI's research server). DocTalk assists patients with common healthcare questions and administrative needs using a multi-agent architecture. During the second semester of senior design, DocTalk's security, or lack thereof, will be put to the test by a group of hackers. Both attacks and defenses will be documented here in order to educate YOU on the vulnerabilities of agentic systems and how they can be mitigated.
 
