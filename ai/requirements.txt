@@ -12,3 +12,4 @@ uvicorn
 pymysql
 cryptography
 bs4
+pyyaml

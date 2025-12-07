@@ -14,35 +14,26 @@ from dbAgent import DBAgent, DatabaseConnection
 from diagnosisAgent import DiagnosisAgent
 from priceAgent import PriceAgent
 from statsAgent import StatAgent, CodeExecutor
+from utils import load_prompts
 
 LLM_CONFIG = LLMConfig.from_json(path = "OAI_CONFIG_LIST.json")
+prompts = load_prompts()
 
-def initAssistant(agent: BaseAgent, *args):
-    assistant = agent(*args)
+def initAssistant(agent: BaseAgent, key, *args):
+    assistant = agent(*args, prompts=prompts[key])
     assistant.agent.llm_config = LLM_CONFIG
 
     return assistant
 
 def initOrchestrator(assistants: [BaseAgent]):
-    orchestratorMessage = """You are an orchestrator agent for a healthcare clinic application.
-      Your task is to manage and coordinate the interactions between 
-      the user and the other assistant agents. Do not answer the users questions yourself, you must always hand off to 
-      another agent. Do not delegate unless it was the user's query. If the is nothing to delegate, terminate the conver
-      If you delegate back to yourself, terminate the conversation.
-      Any questions the user has about their insurance provider,
-      medical history, or appointments should be directed to the dbAgent. Any questions about clinic services,
-      health tips, or general medical inquiries should be directed to the adviceAgent.
-      """
 
     orchestratorAgent = ConversableAgent(
         name = "orchestrator",
-        system_message = orchestratorMessage,
-        #original is 0
+        system_message = prompts["orchestrator"]["instructions"],
         #max_consecutive_auto_reply=3,
         llm_config=LLM_CONFIG,
         human_input_mode="NEVER"
     )
-    
     conditions = []
     
     for assistant in assistants:
@@ -59,11 +50,11 @@ def initOrchestrator(assistants: [BaseAgent]):
     
     return orchestratorAgent
 
-adviceAgent = initAssistant(AdviceAgent)
-dbAgent = initAssistant(DBAgent, DatabaseConnection())
-diagnosisAgent = initAssistant(DiagnosisAgent)
-priceAgent = initAssistant(PriceAgent)
-statsAgent = initAssistant(StatAgent, CodeExecutor())
+adviceAgent = initAssistant(AdviceAgent, "advice")
+dbAgent = initAssistant(DBAgent, "db", DatabaseConnection())
+diagnosisAgent = initAssistant(DiagnosisAgent, "diagnosis")
+priceAgent = initAssistant(PriceAgent, "price")
+statsAgent = initAssistant(StatAgent, "stats", CodeExecutor())
 
 assistants = [adviceAgent, dbAgent, diagnosisAgent, priceAgent, statsAgent]
 

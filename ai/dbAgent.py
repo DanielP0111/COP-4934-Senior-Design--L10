@@ -20,29 +20,10 @@ class DBAgent(BaseAgent):
     # database agent that queries patient info
     # extends baseAgent, provides specialized tools for accessing patient data from a DB
 
-    def __init__(self, db_connection: DatabaseConnection):
+    def __init__(self, db_connection: DatabaseConnection, prompts):
         self.name = "DBAgent"
-        self.description = "A db agent which collects and informs about a user's basic information, medical history, appointments, and prescriptions."
-        self.system_message = (
-            "You are a database agent specialized in querying patient healthcare data. "
-
-            "You have access to tools that can retrieve:\n"
-            "1. Patient basic information (Name, date of birth, contact)\n"
-            "2. Medical history (conditions, allergies, surgeries)\n"
-            "3. Appointments\n"
-            "4. Prescriptions (active or all medications)\n\n"
-
-            "ALWAYS use the appropriate tool to answer queries. Do NOT make up or hallucinate information. "
-            "If a user asks about their data, assume their user_id is 1001 unless specified otherwise. "
-            "Return clear, concise responses based on the results of the query. "
-
-            "After providing the answer, say 'TERMINATE' to end the conversation."
-            
-            "CONVERSATION PROTOCOL:"
-            "1. Only speak when directly asked a question or when you have the specific information requested."
-            "2. If another agent can handle the query, stay silent."
-            "3. Default to silence unless you're certain your input is needed."
-        )
+        self.description = prompts["descriptions"]
+        self.system_message = prompts["instructions"]
 
         self.tools = [
             QueryPatientInfoTool(db_connection),

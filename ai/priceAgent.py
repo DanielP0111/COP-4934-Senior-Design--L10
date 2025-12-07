@@ -12,30 +12,10 @@ from tools.webParseTool import DrugPriceLookupTool
 # "Compare prices for atorvastatin"
 
 class PriceAgent(BaseAgent):
-    def __init__(self):
+    def __init__(self, prompts):
         self.name = "PriceAgent"
-        self.description = "A price agent which finds and summarizes drug price information."
-        self.system_message = (
-            "You are a medication price agent specialized in finding drug prices from Cost Plus Drugs."
-            "You have access to a tool that searches their complete medication database."
-
-            "When a user asks about medication prices:"
-            "1. Use the DrugPriceLookupTool with the medication name"
-            "2. If multiple results are returned, present the top 3-5 options clearly"
-            "3. ALways include: medication name, strength, form, quantity, and price"
-            "4. Mention that prices are from Cost Plus Drugs"
-            "5. If the exact drug isn't found, suggest the closest matches"
-
-            "IMPORTANT:"
-            "Do NOT make up or guess prices - only use the data from the tool!"
-            "If tool returns no results, inform the user the medication wasn't found"
-            "Present prices clearly: both per-unit and total package price"
-            "Include the URL so users can view more details"
-
-            "Once you give the user the result from the tool, terminate the conversation and do not say anything until the user prompts you again."
-
-        )
-
+        self.description = prompts["descriptions"]
+        self.system_message = prompts["instructions"]
         self.tools = [DrugPriceLookupTool()]
         super().__init__(
             name=self.name,
