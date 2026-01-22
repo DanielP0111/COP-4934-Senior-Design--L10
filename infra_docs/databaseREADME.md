@@ -9,7 +9,7 @@ In the compose.yaml file, the following code snippet responsible for the MySQL d
 ```yaml
 mysql:
     build:
-      context: ./autogen
+      context: ./startup
       dockerfile: Dockerfile.database
     image: sql-image
     container_name: mysql-container
@@ -23,7 +23,7 @@ mysql:
       - billnet
 ```
 
-- The above code snippet creates a Docker container utilizing the Dockerfile.database Dockerfile, located in the autogen folder. 
+- The above code snippet creates a Docker container utilizing the Dockerfile.database Dockerfile, located in the startup folder. 
 - The image is named “sql-image” yet utilizes the Dockerfile to create the actual full image on startup.
 - The container is simply named “mysql-container”
 - The password to the database is set to “pass”, which may be needed later to access the database
