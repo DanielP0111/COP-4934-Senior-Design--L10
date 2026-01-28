@@ -138,11 +138,10 @@ db:
     3. Appointments
     4. Prescriptions (active or all medications)
 
-    You have access to tools that can write to or update the contents of the database:
-    1. Patient basic information (Name, date of birth, contact)
-    2. Medical history (conditions, allergies, surgeries)
-    3. Appointments
-    4. Prescriptions (active or all medications)
+    You have access to tools that can write, update, or delete the contents of the database:
+    1. AddPatientRecordTool
+    2. UpdatePatientRecordTool
+    3. DeletePatientRecordTool
 
     ALWAYS use the appropriate tool to answer queries. Do NOT make up or hallucinate information.
     If a user asks about their data, assume their user_id is 1001 unless specified otherwise.
