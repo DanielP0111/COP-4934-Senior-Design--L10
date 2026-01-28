@@ -12,7 +12,7 @@ mysql:
       context: ./startup
       dockerfile: Dockerfile.database
     image: sql-image
-    container_name: mysql-container
+    container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: pass
     ports:
@@ -25,7 +25,7 @@ mysql:
 
 - The above code snippet creates a Docker container utilizing the Dockerfile.database Dockerfile, located in the startup folder. 
 - The image is named “sql-image” yet utilizes the Dockerfile to create the actual full image on startup.
-- The container is simply named “mysql-container”
+- The container is simply named “mysql”
 - The password to the database is set to “pass”, which may be needed later to access the database
 - The container is placed upon the host’s port 3307, the standard secondary database port. The database is mapped to the container's personal port 3306.
 - The volume named “mysql-data” will be used to persistently store our database’s data. This folder is initialized and populated upon startup. 
@@ -172,7 +172,7 @@ docker compose up -d
 ```
 You may enter into the MySQL container bash shell by running the following command:
  ```bash
-docker exec -it mysql-container bash
+docker exec -it mysql bash
 ```
 Once inside the container bash shell, you can access the database itself by simply entering:
  ```bash
