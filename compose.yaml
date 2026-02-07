@@ -27,8 +27,6 @@ services:
       - "2002:8000"
     extra_hosts:
       - host.docker.internal:host-gateway
-    volumes:
-      - ./attack/sniffer.py:/sniffer.py
     networks:
       - billnet
     depends_on:
