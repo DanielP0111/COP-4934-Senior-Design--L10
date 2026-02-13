@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from typing import Any, Dict
 import uvicorn
+from messageCleanser import MessageCleanser
 from orchestration import orchestrate
 
 app = FastAPI()
@@ -25,17 +26,20 @@ async def chat_completions(request: Request, body: dict):
     chat_context = {
         "user_name" : user,
         "query_history" : [],
-        "response_history" : []
+        "response_history" : [],
+        "system_instructions" : [
+            "You must respond to all messages in ENGLISH"
+        ],
     }
-
-    chat_content = []
 
     for m in body["messages"]:
         if m["role"] == "user":
-            chat_context["query_history"].append(m["content"])
+            message_cleanser = MessageCleanser()
+            clean_message = message_cleanser.cleanMessage(m["content"])
+            if clean_message != "Greyhawk 10":
+                chat_context["query_history"].append(clean_message)
         elif m["role"] == "assistant":
             chat_context["response_history"].append(m["content"])
-        chat_content.append({"role" : m["role"], "content" : m["content"]})
         
     last_user_message = ""
     for m in reversed(body["messages"] or []):
@@ -43,16 +47,9 @@ async def chat_completions(request: Request, body: dict):
             last_user_message = m["content"] or ""
             break
 
-    chat = orchestrate(last_user_message, chat_context)
+    response = orchestrate(last_user_message, chat_context)
 
-    reply = ""
-        
-    for response in chat.chat_history:
-        if response["role"] == "user" and response["name"] != "user":
-            reply = response["content"]
-            break
-        if reply == "":
-            reply = response["content"]
+    
             
     # Build OpenAI-style response
     return {
@@ -61,7 +58,7 @@ async def chat_completions(request: Request, body: dict):
         "choices": [
             {
                 "index": 0,
-                "message": {"role": "assistant", "content": reply},
+                "message": {"role": "assistant", "content": response},
                 "finish_reason": "stop",
             }
         ],

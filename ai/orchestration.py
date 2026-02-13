@@ -71,7 +71,7 @@ user = UserProxyAgent(
 
 
 def orchestrate(message, context):
-    # print(message, context)
+    print("MESSAGE: ", message, "\nCONTEXT: ", context)
     agent_pattern = AutoPattern(
         agents=[orchestratorAgent] + [a.agent for a in assistants],
         initial_agent=orchestratorAgent,
@@ -91,8 +91,20 @@ def orchestrate(message, context):
         messages=clean_message,
         max_rounds=10,
     )
+    
+    print("RESULT: ", result, "\nFINAL CONTEXT: ", final_context, "\nLAST AGENT:", last_agent)
+    
+    reply = ""
+        
+    for response in result.chat_history:
+        if response["role"] == "user" and response["name"] != "user":
+            reply = response["content"]
+            break
+        if reply == "":
+            reply = response["content"]
+    
     # print("Result:", result, "\nFinal CTXT:", final_context, "\nLast Agent", last_agent)
-    return result
+    return reply
 
 if __name__ == "__main__":
     message = "I am a 55 year old pregnant woman who smokes, can you give me some healthcare advice?"
