@@ -39,7 +39,6 @@ async def chat_completions(request: Request, body: dict):
         
     last_user_message = ""
     for m in reversed(body["messages"] or []):
-        # messages are pydantic models; use getattr to be defensive
         if m["role"] == "user":
             last_user_message = m["content"] or ""
             break
