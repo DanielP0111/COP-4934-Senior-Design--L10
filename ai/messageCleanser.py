@@ -15,18 +15,18 @@ class Filter():
             'ignore', 'bypass', 'override', 'reveal', 'delete', 'system', 'context', 'delegate'
         ]
     
-        def detectInjection(self, text: str) -> bool:
-            if any(re.search(pattern, text, re.IGNORECASE)
-                for pattern in self.dangerous_patterns):
-                return True
+    def detectInjection(self, text: str) -> bool:
+        if any(re.search(pattern, text, re.IGNORECASE)
+            for pattern in self.dangerous_patterns):
+            return True
 
-            # Fuzzy matching for misspelled words (typoglycemia defense)
-            words = re.findall(r'\b\w+\b', text.lower())
-            for word in words:
-                for pattern in self.fuzzy_patterns:
-                    if self._isSimilarWord(word, pattern):
-                        return True
-            return False
+        # Fuzzy matching for misspelled words (typoglycemia defense)
+        words = re.findall(r'\b\w+\b', text.lower())
+        for word in words:
+            for pattern in self.fuzzy_patterns:
+                if self._isSimilarWord(word, pattern):
+                    return True
+        return False
 
     def _isSimilarWord(self, word: str, target: str) -> bool:
         if len(word) != len(target) or len(word) < 3:
