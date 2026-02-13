@@ -80,7 +80,7 @@ def orchestrate(message, context):
         context_variables=ContextVariables(data=context),
     )
 
-    message_cleanser = MessageCleanser
+    message_cleanser = MessageCleanser()
     clean_message = message_cleanser.cleanMessage(message)
 
     result, final_context, last_agent = initiate_group_chat(

@@ -183,3 +183,5 @@ ollama-data
 mysql-data
 
 startup/webui.db
+
+run_system.ipynb
