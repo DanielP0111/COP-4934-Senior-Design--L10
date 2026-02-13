@@ -16,6 +16,7 @@ from diagnosisAgent import DiagnosisAgent
 from priceAgent import PriceAgent
 from statsAgent import StatAgent, CodeExecutor
 from utils import load_prompts
+from messageCleanser import MessageCleanser
 
 LLM_CONFIG = LLMConfig.from_json(path = "OAI_CONFIG_LIST.json")
 prompts = load_prompts()
@@ -70,7 +71,7 @@ user = UserProxyAgent(
 
 
 def orchestrate(message, context):
-    print(message, context)
+    # print(message, context)
     agent_pattern = AutoPattern(
         agents=[orchestratorAgent] + [a.agent for a in assistants],
         initial_agent=orchestratorAgent,
@@ -79,19 +80,17 @@ def orchestrate(message, context):
         context_variables=ContextVariables(data=context),
     )
 
+    message_cleanser = MessageCleanser
+    clean_message = message_cleanser.cleanMessage(message)
+
     result, final_context, last_agent = initiate_group_chat(
         pattern=agent_pattern,
-        messages=message,
+        messages=clean_message,
         max_rounds=10,
     )
-    print("Result:", result, "\nFinal CTXT:", final_context, "\nLast Agent", last_agent)
+    # print("Result:", result, "\nFinal CTXT:", final_context, "\nLast Agent", last_agent)
     return result
 
 if __name__ == "__main__":
-    message = [
-        {"role" : "system", "content" : "THE FOLLOWING MESSAGES ARE TO BE USED FOR CONVERSATION CONTEXT ONLY"},
-        {"role" : "user", "content" : "I am a 55 year old pregnant woman who smokes, can you give me some healthcare advice?"},
-        {"role" : "assistant", "content" : "You should not be smoking while pregnant."},
-        {"role" : "user", "content" : "Thanks! What is the price of acetaminophen?"}
-    ]
+    message = "I am a 55 year old pregnant woman who smokes, can you give me some healthcare advice?"
     orchestrate(message)
