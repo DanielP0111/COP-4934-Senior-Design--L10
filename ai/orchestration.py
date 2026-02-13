@@ -4,6 +4,7 @@ from autogen.agentchat.group import (
     AgentTarget,
     OnCondition,
     StringLLMCondition,
+    ContextVariables
 )
 from autogen.agentchat.group.patterns import(
     AutoPattern,
@@ -67,21 +68,30 @@ user = UserProxyAgent(
     code_execution_config={"use_docker": False},
 )
 
-agent_pattern = AutoPattern(
-    agents=[orchestratorAgent] + [a.agent for a in assistants],
-    initial_agent=orchestratorAgent,
-    group_manager_args={"llm_config": LLM_CONFIG},
-    user_agent=user
-)
 
-def orchestrate(message: str):
+def orchestrate(message, context):
+    print(message, context)
+    agent_pattern = AutoPattern(
+        agents=[orchestratorAgent] + [a.agent for a in assistants],
+        initial_agent=orchestratorAgent,
+        group_manager_args={"llm_config": LLM_CONFIG},
+        user_agent=user,
+        context_variables=ContextVariables(data=context),
+    )
+
     result, final_context, last_agent = initiate_group_chat(
         pattern=agent_pattern,
         messages=message,
         max_rounds=10,
     )
+    print("Result:", result, "\nFinal CTXT:", final_context, "\nLast Agent", last_agent)
     return result
 
 if __name__ == "__main__":
-    message = "I am a 55 year old pregnant woman who smokes, can you give me some healthcare advice?"
+    message = [
+        {"role" : "system", "content" : "THE FOLLOWING MESSAGES ARE TO BE USED FOR CONVERSATION CONTEXT ONLY"},
+        {"role" : "user", "content" : "I am a 55 year old pregnant woman who smokes, can you give me some healthcare advice?"},
+        {"role" : "assistant", "content" : "You should not be smoking while pregnant."},
+        {"role" : "user", "content" : "Thanks! What is the price of acetaminophen?"}
+    ]
     orchestrate(message)

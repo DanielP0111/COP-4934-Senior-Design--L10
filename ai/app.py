@@ -20,36 +20,42 @@ async def health():
 
 @app.post("/v1/chat/completions")
 async def chat_completions(request: Request, body: dict):
-    # Simple mock: echo the last message whose role == 'user'.
-    # Ignore assistant/tool messages to avoid echo-amplification when used as a loopback.
-
     user = request.headers.get("X-OpenWebUI-User-Id")
+    
+    chat_context = {
+        "user_name" : user,
+        "query_history" : [],
+        "response_history" : []
+    }
 
-    chat_context = f"--CONTEXT--\nTHIS IS A CHAT WITH USER ID {user}\n"
+    chat_content = []
 
     for m in body["messages"]:
-        chat_context += f"{m["role"]}: {m["content"]}\n"
-
-    chat_context += "--CONTEXT--\n"
-
+        if m["role"] == "user":
+            chat_context["query_history"].append(m["content"])
+        elif m["role"] == "assistant":
+            chat_context["response_history"].append(m["content"])
+        chat_content.append({"role" : m["role"], "content" : m["content"]})
+        
     last_user_message = ""
     for m in reversed(body["messages"] or []):
         # messages are pydantic models; use getattr to be defensive
         if m["role"] == "user":
             last_user_message = m["content"] or ""
             break
-            
-    chat_context += f"USER MESSAGE (USER ID: {user}): {last_user_message}"
+
+    chat = orchestrate(last_user_message, chat_context)
 
     reply = ""
-    chat = orchestrate(chat_context)
+        
     for response in chat.chat_history:
         if response["role"] == "user" and response["name"] != "user":
             reply = response["content"]
             break
         if reply == "":
             reply = response["content"]
-    # Build a minimal OpenAI-style response
+            
+    # Build OpenAI-style response
     return {
         "id": "mock-1",
         "object": "chat.completion",
