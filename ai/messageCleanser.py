@@ -51,7 +51,7 @@ class MessageCleanser():
     def cleanMessage(self, message: str) -> str:
         if self.message_filter.detectInjection(message):
             # This is technically the user's cleaned message, but it will cause the agent to repeat it anyway.
-            return "I'm sorry. I'm afraid I can't do that"
+            return "Greyhawk 10"
         
         clean_message = self.message_filter.sanitizeInput(message)
         

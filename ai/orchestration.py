@@ -83,6 +83,9 @@ def orchestrate(message, context):
     message_cleanser = MessageCleanser()
     clean_message = message_cleanser.cleanMessage(message)
 
+    if clean_message == "Greyhawk 10":
+        return "I'm sorry. I'm afraid I can't do that."
+
     result, final_context, last_agent = initiate_group_chat(
         pattern=agent_pattern,
         messages=clean_message,
