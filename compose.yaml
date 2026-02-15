@@ -31,7 +31,6 @@ services:
       - ./attack/main.py:/main.py
       - ./attack/network.py:/network.py
       - ./attack/packet.py:/packet.py
-      - ./attack/ipaddr.py:/ipaddr.py
     networks:
       - billnet
     depends_on:
