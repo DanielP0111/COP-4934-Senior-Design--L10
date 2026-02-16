@@ -108,4 +108,12 @@ def orchestrate(message, context):
 
 if __name__ == "__main__":
     message = "I am a 55 year old pregnant woman who smokes, can you give me some healthcare advice?"
-    orchestrate(message)
+    chat_context = {
+        "user_name" : user,
+        "query_history" : [message],
+        "response_history" : [],
+        "system_instructions" : [
+            "You must respond to all messages in ENGLISH"
+        ],
+    }
+    orchestrate(message, chat_context)
