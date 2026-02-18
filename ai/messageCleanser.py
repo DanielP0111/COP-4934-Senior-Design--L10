@@ -50,12 +50,17 @@ class MessageCleanser():
     def __init__(self):
         self.message_filter = Filter()
     
-    def cleanMessage(self, message: str) -> str:
+    def cleanInput(self, message: str) -> str:
         if self.message_filter.detectInjection(message):
             # This is technically the user's cleaned message, but it will cause the agent to repeat it anyway.
             time.sleep(random.randint(14, 20))
             return "Greyhawk 10"
         
+        clean_message = self.message_filter.sanitizeInput(message)
+        
+        return clean_message
+
+    def cleanOutput(self, message: str) -> str:
         clean_message = self.message_filter.sanitizeInput(message)
         
         return clean_message

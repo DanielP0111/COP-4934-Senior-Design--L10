@@ -84,7 +84,7 @@ def orchestrate(message, context_block):
     print("MESSAGE: ", message, "\nCONTEXT: ", context_block)
     
     message_cleanser = MessageCleanser()
-    clean_message = message_cleanser.cleanMessage(message)
+    clean_message = message_cleanser.cleanInput(message)
     
     full_message_with_context = context_block + clean_message
 
@@ -110,7 +110,11 @@ def orchestrate(message, context_block):
         if reply == "":
             reply = response["content"]
     
-    return reply
+    clean_reply = message_cleanser.cleanOutput(reply)
+    
+    print(clean_reply)
+    
+    return clean_reply
 
 if __name__ == "__main__":
     message = "I am a 55 year old pregnant woman who smokes, can you give me some healthcare advice?"
