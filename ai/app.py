@@ -2,7 +2,6 @@ from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from typing import Any, Dict
 import uvicorn
-from messageCleanser import MessageCleanser
 from orchestration import orchestrate
 
 app = FastAPI()

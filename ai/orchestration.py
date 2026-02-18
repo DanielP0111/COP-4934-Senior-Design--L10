@@ -17,7 +17,7 @@ from diagnosisAgent import DiagnosisAgent
 from priceAgent import PriceAgent
 from statsAgent import StatAgent, CodeExecutor
 from utils import load_prompts
-from messageCleanser import MessageCleanser
+from messageCleanser import InputCleanser, OutputCleanser
 
 LLM_CONFIG = LLMConfig.from_json(path = "OAI_CONFIG_LIST.json")
 prompts = load_prompts()
@@ -83,8 +83,8 @@ def orchestrate(message, context_block):
     
     print("MESSAGE: ", message, "\nCONTEXT: ", context_block)
     
-    message_cleanser = MessageCleanser()
-    clean_message = message_cleanser.cleanInput(message)
+    input_cleanser = InputCleanser()
+    clean_message = input_cleanser.cleanInput(message)
     
     full_message_with_context = context_block + clean_message
 
@@ -110,7 +110,8 @@ def orchestrate(message, context_block):
         if reply == "":
             reply = response["content"]
     
-    clean_reply = message_cleanser.cleanOutput(reply)
+    output_cleanser = OutputCleanser()
+    clean_reply = output_cleanser.cleanOutput(reply)
     
     print(clean_reply)
     

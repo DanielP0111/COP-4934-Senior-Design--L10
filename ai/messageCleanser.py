@@ -2,7 +2,7 @@ import re
 import random
 import time
 
-class Filter():
+class InputFilter():
     def __init__(self):
         # Banned sentences
         self.dangerous_patterns = [
@@ -46,13 +46,12 @@ class Filter():
             text = re.sub(pattern, '[FILTERED]', text, flags=re.IGNORECASE)
         return text[:10000]
 
-class MessageCleanser():
+class InputCleanser():
     def __init__(self):
-        self.message_filter = Filter()
+        self.message_filter = InputFilter()
     
     def cleanInput(self, message: str) -> str:
         if self.message_filter.detectInjection(message):
-            # This is technically the user's cleaned message, but it will cause the agent to repeat it anyway.
             time.sleep(random.randint(14, 20))
             return "Greyhawk 10"
         
@@ -60,7 +59,29 @@ class MessageCleanser():
         
         return clean_message
 
+class OutputCleanser:
+    def __init__(self):
+        self.suspicious_patterns = [
+            r'SYSTEM\s*[:]\s*You\s+are',
+            r'API[_\s]KEY[:=]\s*\w+',
+            r'-*CONTEXT-*(.*?)-*CONTEXT-*',
+        ]
+        
+        self.replacements = {
+            r'\b\w+Agent\b' : 'Agent',
+        }
+
+    def validateOutput(self, output: str) -> bool:
+        return not any(re.search(pattern, output, re.IGNORECASE | re.DOTALL)
+                      for pattern in self.suspicious_patterns)
+
     def cleanOutput(self, message: str) -> str:
-        clean_message = self.message_filter.sanitizeInput(message)
+        if not self.validateOutput(message) or len(message) > 5000:
+            return "Your request was flagged as potentially violating our safety regulations. Please try again with a different prompt."
+        
+        clean_message = message
+        
+        for old, new in self.replacements.items():
+            clean_message = re.sub(old, new, clean_message, flags=re.IGNORECASE)
         
         return clean_message
