@@ -107,13 +107,15 @@ def orchestrate(message, context_block):
         if response["role"] == "user" and response["name"] != "user":
             reply = response["content"]
             break
-        if reply == "":
-            reply = response["content"]
+    if reply == "":
+        reply = "I'm sorry, there was an error in the response. Please try again."
+    
+    print("REPLY: ", reply)
     
     output_cleanser = OutputCleanser()
     clean_reply = output_cleanser.cleanOutput(reply)
     
-    print(clean_reply)
+    print("CLEAN REPLY: ", clean_reply)
     
     return clean_reply
 
