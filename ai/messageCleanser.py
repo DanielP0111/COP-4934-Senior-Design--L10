@@ -10,6 +10,10 @@ class InputFilter():
             r'you\s+are\s+now\s+(in\s+)?developer\s+mode',
             r'system\s+override',
             r'reveal\s+prompt',
+            # Banning sentences that mimic our context system
+            r'user\s+id',
+            r'user\s+message'
+            r'assistant:',
         ]
 
         # Banned words
