@@ -72,7 +72,7 @@ class OutputCleanser:
         ]
         
         self.replacements = {
-            r'\b\w+Agent\b' : 'Agent',
+            r'\b\w+Agent\w*\b' : 'Agent',
         }
 
     def validateOutput(self, output: str) -> bool:
