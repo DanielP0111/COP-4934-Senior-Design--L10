@@ -23,6 +23,8 @@ async def health():
 async def chat_completions(request: Request, body: dict):
     user = request.headers.get("X-OpenWebUI-User-Id")
     
+    '''
+    
     chat_context = {
         "user_name" : user,
         "query_history" : [],
@@ -40,16 +42,25 @@ async def chat_completions(request: Request, body: dict):
                 chat_context["query_history"].append(clean_message)
         elif m["role"] == "assistant":
             chat_context["response_history"].append(m["content"])
+            
+    '''
+    
+    chat_context = f"--CONTEXT--\nTHIS IS A CHAT WITH USER ID {user}\n"
+
+    for m in body["messages"]:
+        chat_context += f"{m["role"]}: {m["content"]}\n"
+
+    chat_context += "--CONTEXT--\n"
         
     last_user_message = ""
     for m in reversed(body["messages"] or []):
         if m["role"] == "user":
             last_user_message = m["content"] or ""
             break
+            
+    message = f"USER MESSAGE (USER ID: {user}): {last_user_message}"
 
-    response = orchestrate(last_user_message, chat_context)
-
-    
+    response = orchestrate(message, chat_context)    
             
     # Build OpenAI-style response
     return {

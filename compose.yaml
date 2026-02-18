@@ -4,6 +4,7 @@ services:
     container_name: ollama
     volumes:
       - ./ollama-data:/root/.ollama
+      #- ./startup/Modelfile:/root/.ollama/Modelfile:ro
     ports:
       - "2011:11434"
     networks:

@@ -2,6 +2,7 @@ from autogen import ConversableAgent, LLMConfig,  UserProxyAgent
 from autogen.agentchat import initiate_group_chat
 from autogen.agentchat.group import (
     AgentTarget,
+    TerminateTarget,
     OnCondition,
     StringLLMCondition,
     ContextVariables
@@ -70,27 +71,33 @@ user = UserProxyAgent(
 )
 
 
-def orchestrate(message, context):
-    print("MESSAGE: ", message, "\nCONTEXT: ", context)
+def orchestrate(message, context_block):    
     agent_pattern = AutoPattern(
         agents=[orchestratorAgent] + [a.agent for a in assistants],
         initial_agent=orchestratorAgent,
         group_manager_args={"llm_config": LLM_CONFIG},
         user_agent=user,
-        context_variables=ContextVariables(data=context),
+        #context_variables=ContextVariables(data=context),
+        summary_method="last_msg",
     )
-
+    
+    print("MESSAGE: ", message, "\nCONTEXT: ", context_block)
+    
     message_cleanser = MessageCleanser()
     clean_message = message_cleanser.cleanMessage(message)
+    
+    full_message_with_context = context_block + clean_message
 
     if clean_message == "Greyhawk 10":
         return "I'm sorry. I'm afraid I can't do that."
 
     result, final_context, last_agent = initiate_group_chat(
         pattern=agent_pattern,
-        messages=clean_message,
-        max_rounds=10,
+        messages=full_message_with_context,
+        max_rounds=10,        
     )
+    
+    print(result.summary)
     
     print("RESULT: ", result, "\nFINAL CONTEXT: ", final_context, "\nLAST AGENT:", last_agent)
     
@@ -103,7 +110,6 @@ def orchestrate(message, context):
         if reply == "":
             reply = response["content"]
     
-    # print("Result:", result, "\nFinal CTXT:", final_context, "\nLast Agent", last_agent)
     return reply
 
 if __name__ == "__main__":
