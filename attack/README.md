@@ -2,6 +2,9 @@
 
 This document will serve as an example for how we are planning on formatting our statisitics/log document. In here we will have generalized prompt success stats that will then refernce the specific prompts in their separate attack outline docs. Each prompt that was used will be classified as context, recon, or RCE prompts. 
 
+## Control prompts
+success rate of these control prompts
+
 ## Recon prompts
 
 | Total attack attempts | Sucessful Attempts | Success Rate |
