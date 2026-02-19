@@ -80,6 +80,7 @@ def orchestrate(message: str):
         pattern=agent_pattern,
         messages=message,
         max_rounds=10,
+        safeguard_policy = safeguards,
     )
     return result
 
