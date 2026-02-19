@@ -14,10 +14,11 @@ from dbAgent import DBAgent, DatabaseConnection
 from diagnosisAgent import DiagnosisAgent
 from priceAgent import PriceAgent
 from statsAgent import StatAgent, CodeExecutor
-from utils import load_prompts
+from utils import load_prompts, load_safeguards
 
 LLM_CONFIG = LLMConfig.from_json(path = "OAI_CONFIG_LIST.json")
 prompts = load_prompts()
+safeguards = load_safeguards()
 
 def initAssistant(agent: BaseAgent, key, *args):
     assistant = agent(*args, prompts=prompts[key])
