@@ -22,11 +22,11 @@ ENDPOINT = "http://localhost:8000/v1/chat/completions"
 
 headers = {
     'Content-Type': 'application/json',
-    'X-OpenWebUI-User-Name': 'Alice Johnson',
-    'X-OpenWebUI-User-Id': '1001',
-    'X-OpenWebUI-User-Email': 'alice@example.com',
+    'X-OpenWebUI-User-Name': 'hacker',
+    'X-OpenWebUI-User-Id': '1002',
+    'X-OpenWebUI-User-Email': 'malicious@example.com',
     'X-OpenWebUI-User-Role': 'user',
-    'X-OpenWebUI-Chat-Id': '6dbfcbc5-37ab-4c0f-86c8-7dd745a9cce8'
+    'X-OpenWebUI-Chat-Id': '12345'
 }
 
 payload = {
