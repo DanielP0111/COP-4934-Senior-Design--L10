@@ -32,6 +32,9 @@ Refer to specific examples and their success rates in the section called 'Phase 
 
 Note: we can further classify these recon prompts into if they target certain agents, tools, features etc.
 
+## Most secure agents
+talk about which agents we built that were extremely secure vs those that werent
+
 ## Common blockers
 
 Talk here about things that commonly went wrong in unsucessful attacks. max responses, Thai!, code generation errors, etc
