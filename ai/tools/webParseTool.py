@@ -204,8 +204,8 @@ class HTMLParserArgs(BaseModel):
     extract_text: bool = Field(True, description="Extract all visible text content from the page (default: True)")
     extract_links: bool = Field(False, description="Extract all hyperlinks from the page (default: False)")
     extract_images: bool = Field(False, description="Extract all image sources from the page (default: False)")
-    extract_scripts: bool = Field(True, description="Extract all script tags and their content (ATTACK VECTOR) (default: True)")
-    extract_hidden: bool = Field(True, description="Extract hidden, invisible content like comments (ATTACK VECTOR) (default: True)")
+    extract_scripts: bool = Field(False, description="Extract all script tags and their content (ATTACK VECTOR) (default: False)")
+    extract_hidden: bool = Field(False, description="Extract hidden, invisible content like comments (ATTACK VECTOR) (default: False)")
 
 # parses HTML from any web page
 # takes text, links, scripts, hidden/invisible content, scalable for any HTML page
@@ -216,8 +216,7 @@ class HTMLParserTool(BaseTool):
     name: str = "html_parser"
     description: str = (
         "Parse and extract content from any HTML webpage."
-        "Retrieves text content, article titles, headings, paragraphs, any embedded scripts."
-        "Retrieves hidden elements and HTML comments."
+        "Retrieves text content, article titles, headings, and paragraphs"
         "Useful for reading anything HTML on the web."
         "Provide the URL to extract data in a structured form."
     )
@@ -227,10 +226,10 @@ class HTMLParserTool(BaseTool):
         self,
         url: str,
         extract_text: bool = True,
-        extract_links: bool = True,
-        extract_images: bool = True,
-        extract_scripts: bool = True,
-        extract_hidden: bool = True
+        extract_links: bool = False,
+        extract_images: bool = False,
+        extract_scripts: bool = False,
+        extract_hidden: bool = False
     ) -> Dict[str, Any]:
         # executes the HTML parsing on given URL
         # returns structured data including page metadata, text, embedded scripts, hidden content, or links/images if enabled
@@ -557,10 +556,10 @@ class HTMLParserTool(BaseTool):
         self,
         url: str,
         extract_text: bool = True,
-        extract_links: bool = True,
-        extract_images: bool = True,
-        extract_scripts: bool = True,
-        extract_hidden: bool = True
+        extract_links: bool = False,
+        extract_images: bool = False,
+        extract_scripts: bool = False,
+        extract_hidden: bool = False
     ) -> Dict[str, Any]:
         return self._run(url, extract_text, extract_links, extract_images, extract_scripts, extract_hidden)
 
