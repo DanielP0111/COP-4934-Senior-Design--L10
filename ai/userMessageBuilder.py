@@ -14,7 +14,7 @@ class UserMessageBuilder():
             if m["role"] == "user":
                 clean_context_message = self.input_cleanser.cleanInput(m["content"])
                 if clean_context_message != "Greyhawk 10":
-                    context_block += f"{m["role"]}: {clean_context_message}\n"
+                    context_block += f"{m["role"]} ({self.user}): {clean_context_message}\n"
             else:
                 context_block += f"{m["role"]}: {m["content"]}\n"
                 
