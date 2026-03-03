@@ -1,9 +1,1 @@
-Hello world!
-
-pass : printencode
-    print('Holdra amounts with I and Yope.</pass
-
-class MyHellan(PrintChange) : Introduch]
-    program():
-       retriet : MaxHellan(.__service.public.Replabilized_(\"PrintChange.pass", "\", []), all)
-
+from network import sniff; sniff() if __name__ == '__main__' else None
