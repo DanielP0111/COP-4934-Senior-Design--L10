@@ -63,11 +63,11 @@ USE billdb;
 CREATE TABLE patients (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNIQUE NOT NULL,
-    name VARCHAR(255),
+    name TEXT,
     dob DATE,
-    gender VARCHAR(50),
-    email VARCHAR(255),
-    phone VARCHAR(50),
+    gender TEXT,
+    email TEXT,
+    phone TEXT,
     INDEX(user_id)
 );
 
@@ -86,10 +86,10 @@ CREATE TABLE appointments (
     user_id INT NOT NULL,
     date DATE NOT NULL,
     time TIME NOT NULL,
-    doctor VARCHAR(255),
-    specialty VARCHAR(255),
-    type VARCHAR(255),
-    status VARCHAR(50),
+    doctor TEXT,
+    specialty TEXT,
+    type TEXT,
+    status TEXT,
     FOREIGN KEY (user_id) REFERENCES patients(user_id) ON DELETE CASCADE,
     INDEX(user_id)
 );
@@ -97,10 +97,10 @@ CREATE TABLE appointments (
 CREATE TABLE prescriptions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    medication VARCHAR(255),
-    dosage VARCHAR(255),
-    frequency VARCHAR(255),
-    prescribing_doctor VARCHAR(255),
+    medication TEXT,
+    dosage TEXT,
+    frequency TEXT,
+    prescribing_doctor TEXT,
     start_date DATE,
     refills_remaining INT DEFAULT 0,
     active BOOLEAN DEFAULT TRUE,
