@@ -75,12 +75,17 @@ agent_pattern = AutoPattern(
     user_agent=user
 )
 
+safeguard_enforcer = apply_safeguard_policy(
+    agents=[orchestratorAgent, statsAgent.agent],
+    policy="safeguards.json",
+    safeguard_llm_config=LLM_CONFIG,
+)
+
 def orchestrate(message: str):
     result, final_context, last_agent = initiate_group_chat(
         pattern=agent_pattern,
         messages=message,
         max_rounds=10,
-        safeguard_policy = safeguards,
     )
     return result
 
