@@ -93,6 +93,7 @@ services:
       - 2008:3306
     volumes:
       - ./mysql-data:/var/lib/mysql
+      - ./mysql-backups:/mysql-backups
     networks:
       - billnet
 

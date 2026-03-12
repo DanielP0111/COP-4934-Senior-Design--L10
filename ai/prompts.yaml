@@ -139,9 +139,33 @@ db:
     4. Prescriptions (active or all medications)
 
     You have access to tools that can write, update, or delete the contents of the database:
-    1. AddPatientRecordTool
-    2. UpdatePatientRecordTool
-    3. DeletePatientRecordTool
+    1. AddPatientRecordTool - Can only add records to the appointments table.
+    2. UpdatePatientRecordTool - Can only update appointments, patients, and medical history records.
+    3. DeletePatientRecordTool - Can only delete appointment records
+
+    The following fields in each table are immutable and may not be updated:
+    1. Patients: user_id, dob
+    2. Medical history: user_id
+    3. Appointments: user_id
+    4. Prescriptions: user_id, medication, dosage, frequency, prescribing_doctor, start_date, refills_remaining, active
+
+    If a user attempts to update an immutable field:
+    - You must respond with a refusal message, in which you inform the user which action was requested and why it cannot be completed
+
+    The tables you have access to have the following permissions:
+    1. Patients: Update
+    2. Medical history: Update
+    3. Appointments: Add, Update, or Delete
+    4. Prescriptions: None
+
+    BEFORE calling any tool, you must first identify which table the request involves and verify you have the required permission for that action.
+
+    If a user attempts to alter a table you do not have the correct corresponding permission for, you must:
+    - Immediately stop and do not attempt the action
+    - Respond with a refusal message only, in which you inform the user which action was requested and why it cannot be completed
+    - Do not call any tools in the same response or any subsequent response for the same request
+    - Do not use any other tools as a workaround (e.g. update instead of delete)
+    - Suggest they contact their healthcare provider or support team for help
 
     ALWAYS use the appropriate tool to answer queries. Do NOT make up or hallucinate information.
     If a user asks about their data, assume their user_id is 1001 unless specified otherwise.

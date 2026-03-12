@@ -483,12 +483,17 @@ class UpdatePatientRecordArgs(BaseModel):
 class UpdatePatientRecordTool(BaseTool):
     name: str = "update_patient_record"
     description: str = """Updates patient records inside the database.
-    Has capability to modify records in all tables.
-    Requires user_id to identify the patient & a record_id if appointments and prescriptions are being modified
+    Has capability to modify records in the patients, appointments, and medical history tables.
+    Requires user_id to identify the patient & a record_id if appointments are being modified
     Pass updates as a dictionary of field names and their new values. """
     args_schema: Type[BaseModel] = UpdatePatientRecordArgs
     db_connection: Any = None
     TABLE_MAP: Dict[str, Any] = {}
+
+    IMMUTABLE_FIELDS: Dict[str, set] = {
+        "_all": {"user_id"},  # Immutable across all tables
+        "patients": {"dob"},  # Immutable for patients specifically
+    }
 
     def __init__(self, db_connection: DatabaseConnection, models: Dict[str, Any] = None):
         super().__init__()
@@ -497,22 +502,29 @@ class UpdatePatientRecordTool(BaseTool):
             "patients": Patient,
             "medical_history": MedicalHistory,
             "appointments": Appointment,
-            "prescriptions": Prescription
         }
     
     def _run(self, user_id: int, table: str, updates: Dict[str, Any], record_id: Optional[int] = None) -> Dict[str, Any]:
         print(f"[DB write] updating {table} for user_id={user_id}, record_id={record_id}, updates={updates}")
-        # there's nothing that actually makes sure the user_id matches the authenticated user, so very vulnerable
-        # this is a step that may be taken in real life for a small business chatbot
 
         if table not in self.TABLE_MAP:
             return {"error": f"Invalid table: {table}. Valid tables: {list(self.TABLE_MAP.keys())}"}
         
+        # Filter out immutable fields before touching the DB
+        immutable = self.IMMUTABLE_FIELDS["_all"] | self.IMMUTABLE_FIELDS.get(table, set())
+        blocked_fields = immutable & updates.keys()
+        if blocked_fields:
+            print(f"[DB write] warning: attempt to modify immutable fields {blocked_fields} on {table} — skipping")
+            updates = {k: v for k, v in updates.items() if k not in immutable}
+
+        if not updates:
+            return {"error": f"No updatable fields provided. Fields {blocked_fields} are immutable for {table}."}
+
         model = self.TABLE_MAP[table]
         session = self.db_connection.get_session()
 
         try:
-            if table in ["appointments", "prescriptions"]:
+            if table in ["appointments"]:
                 if record_id is None:
                     return {"error": f"record_id is required for {table} table"}
                 record = session.query(model).filter_by(user_id=user_id, id=record_id).first()
@@ -522,8 +534,7 @@ class UpdatePatientRecordTool(BaseTool):
             if not record:
                 return {"error": f"Record not found in {table} for user_id={user_id}" + (f", record_id={record_id}" if record_id else "")}
             
-            # there's nothing that actually validates field values or field names
-            # so another vulnerability potentially can be exploited in real life
+
             updated_fields = []
             for field, value in updates.items():
                 if hasattr(record, field):
@@ -561,27 +572,18 @@ class AddPatientRecordArgs(BaseModel):
 
 class AddPatientRecordTool(BaseTool):
     name: str = "add_patient_record"
-    description: str = """Add a new record to any table in the database
+    description: str = """Add a new record to the appointments table in the database
     record_data must include required fields. Do NOT include 'id' because it's auto generated upon addition
-    For patients: user_id, name, dob (YYYY-MM-DD), gender, email, phone
-    For medical history: user_id, conditions, allergies, surgeries
-    For appointments: user_id, date (YYYY-MM-DD), time (HH:MN:SS), doctor, specialty, type, status
-    For prescriptions: user_id, medication, dosage, frequency, prescribing_doctor, start_date, refills_remaining, active"""
+    For appointments: user_id, date (YYYY-MM-DD), time (HH:MN:SS), doctor, specialty, type, status"""
     args_schema: Type[BaseModel] = AddPatientRecordArgs
     db_connection: Any = None
     TABLE_MAP: Dict[str, Any] = {}
-
-    # there's no restrictions on what table you can add stuff to
-    # this would not be the case in a secure version
     
     def __init__(self, db_connection: DatabaseConnection, models: Dict[str, Any] = None):
         super().__init__()
         self.db_connection = db_connection
         self.TABLE_MAP = models or {
-            "patients": Patient,
-            "medical_history": MedicalHistory,
-            "appointments": Appointment,
-            "prescriptions": Prescription
+            "appointments": Appointment
         }
     
     def _run(self, table: str, record_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -598,10 +600,6 @@ class AddPatientRecordTool(BaseTool):
 
         try:
             # sanitize date and time strings
-            if table == "patients":
-                if isinstance(record_data_clean.get("dob"), str):
-                    record_data_clean["dob"] = datetime.strptime(record_data_clean["dob"], "%Y-%m-%d").date()
-            
             if table == "appointments":
                 if isinstance(record_data_clean.get("date"), str):
                     record_data_clean["date"] = datetime.strptime(record_data_clean["date"], "%Y-%m-%d").date()
@@ -612,12 +610,6 @@ class AddPatientRecordTool(BaseTool):
                     except ValueError:
                         record_data_clean["time"] = datetime.strptime(time_str, "%H:%M").time()
             
-            if table == "prescriptions":
-                if isinstance(record_data_clean.get("start_date"), str):
-                    record_data_clean["start_date"] = datetime.strptime(record_data_clean["start_date"], "%Y-%m-%d").date()
-            
-            # direct contact with unvalidated data is pretty bad
-            # this is another direct vulnerability
             new_record = model(**record_data_clean)
 
             session.add(new_record)
@@ -648,12 +640,11 @@ class DeletePatientRecordArgs(BaseModel):
     table: str = Field(..., description="Table to delete from")
     record_id: int = Field(..., description="id of the record to delete")
 
+# tool to delete an appointment record
 class DeletePatientRecordTool(BaseTool):
-    name: str = "delete_patient_record"
-    description: str = """Delete a record from any table in the database.
-    Deleting a patient will cascade and delete ALL their info
-    For patients table: use record_id matching the patient's 'id' field (not user_id))
-    For any other tables: requires both user_id and record_id to identify the specific record."""
+    name: str = "delete_appointment_record"
+    description: str = """Delete a record from the appointments table in the database.
+    For the appointments table: requires both user_id and record_id to identify the specific record."""
     args_schema: Type[BaseModel] = DeletePatientRecordArgs
     db_connection: Any = None
     TABLE_MAP: Dict[str, Any] = {}
@@ -663,17 +654,11 @@ class DeletePatientRecordTool(BaseTool):
         super().__init__()
         self.db_connection = db_connection
         self.TABLE_MAP = models or {
-            "patients": Patient,
-            "medical_history": MedicalHistory,
-            "appointments": Appointment,
-            "prescriptions": Prescription
+            "appointments": Appointment
         }
     
     def _run(self, table: str, record_id: int, user_id: Optional[int] = None) -> Dict[str, Any]:
         print(f"[DB write] deleting from {table}: user_id={user_id}, record_id={record_id}")
-
-        # no confirmation required for any deletion
-        # this is pretty vulnerable
 
         if table not in self.TABLE_MAP:
             return {"error": f"Invalid table: {table}. Valid tables: {list(self.TABLE_MAP.keys())}"}
@@ -682,26 +667,10 @@ class DeletePatientRecordTool(BaseTool):
         session = self.db_connection.get_session()
 
         try:
-            # each table has different query logic
-            # you could bypass the check for user_id
-            if table == "patients":
-                # for patients, delete by record_id (the auto genned one)
-                # again this will cascade all records with relation
-                record = session.query(model).filter_by(id=record_id).first()
-            elif table == "medical_history":
-                # medical history can be deleted by id alone or with a user_id
+            if table == "appointments":
+                # for appointments use user_id and record_id
                 if user_id:
                     record = session.query(model).filter_by(user_id=user_id, id=record_id).first()
-                else:
-                    record = session.query(model).filter_by(id=record_id).first()
-            else:
-                # for appointments or prescriptions use both user_id and record_id
-                if user_id:
-                    record = session.query(model).filter_by(user_id=user_id, id=record_id).first()
-                else:
-                    # if no user id is provided delete by record id
-                    # also a vulnerability because a user id isnt needed
-                    record = session.query(model).filter_by(id=record_id).first()
             
             if not record:
                 return {"error": f"Record not found: {table} with user_id={user_id}, record_id={record_id}"}

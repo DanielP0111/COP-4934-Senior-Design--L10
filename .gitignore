@@ -181,3 +181,4 @@ cython_debug/
 webui-data
 ollama-data
 mysql-data
+mysql-backups

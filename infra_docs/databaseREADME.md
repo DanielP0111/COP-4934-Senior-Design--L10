@@ -19,6 +19,7 @@ mysql:
       - 3307:3306
     volumes:
       - ./mysql-data:/var/lib/mysql
+      - ./mysql-backups:/mysql-backups
     networks:
       - billnet
 ```
@@ -29,6 +30,7 @@ mysql:
 - The password to the database is set to “pass”, which may be needed later to access the database
 - The container is placed upon the host’s port 3307, the standard secondary database port. The database is mapped to the container's personal port 3306.
 - The volume named “mysql-data” will be used to persistently store our database’s data. This folder is initialized and populated upon startup. 
+- The volume named "mysql-backups" is used to store backups of our database in order to ensure that all data can be recovered in case it is lost.
 - **BEWARE:** The files automatically created upon startup will be initialized with particular privileges. As a result, a traditional user upon our server Bill will be unable to delete some of these files after the fact. This is caused by insufficient privileges for a traditional non-admin user.
 - Lastly, the database is placed upon our network, named billnet, so that it may be interacted with by other containers on the network
 
@@ -41,11 +43,21 @@ FROM docker.io/mysql
 # Copying our SQL script into this directory ensures it runs on first startup
 # This will populate our DB with dummy data
 COPY ./init_database.sql /docker-entrypoint-initdb.d/
+
+# Copying our database backup script to the container
+COPY ./backup_database.sh /usr/local/bin/backup_database.sh
+
+RUN chmod +x /usr/local/bin/backup_database.sh
+
+# Override the default entrypoint with our backup script
+ENTRYPOINT ["/usr/local/bin/backup_database.sh"]
 ```
 
 - Inside the Dockerfile, we will simply pull the latest mysql image from docker.io as a baseline. 
 - We then copy our SQL initialization script into the initialization directory
 	- As a result, this script will run upon the first startup of our container, ensuring our database is properly populated with our dummy test data
+- The database backup script is then transferred onto the database container and given execution permissions.
+- The default entrypoint is then overridden to force the container to run our script on initialization.
 
 ## The Database Initialization Script 
 This script, named “init_database.sql” is an sql script used to initialize and fill in our database.
@@ -165,6 +177,28 @@ INSERT INTO prescriptions (user_id, medication, dosage, frequency, prescribing_d
 - The tables for patients, medical history, appointments, and prescriptions are then created and initialized
 - Lastly, the freshly created tables are then populated with sample dummy data to be utilized by our agentic healthcare chatbot system.
 
+## The Database Backup Script 
+This script, named “backup_database.sh” is a script used to routinely backup our database.
+
+<details>
+    <summary>Click here to expand and see backup_database.sh</summary>
+
+```sh
+#!/bin/bash
+# Creates a backup of the database every 10 minutes and hands control back to the default entrypoint
+while true; do
+    mysqldump -uroot -p$MYSQL_ROOT_PASSWORD billdb | gzip > /mysql-backups/billdb_$(date +%Y%m%d_%H%M%S).sql.gz
+    sleep 600
+done &
+exec docker-entrypoint.sh mysqld
+```
+
+</details>
+
+- The script above begins a persistent task of creating a backup of the database every 10 minutes.
+- The generated backup will be compressed as a .gz file.
+- Lastly, the script hands control back to the default entrypoint to ensure that the database initializes correctly.
+
 ## Accessing the container
 After running the following code to startup all of the containers in the compose file:
 ```bash
@@ -175,10 +209,6 @@ You may enter into the MySQL container bash shell by running the following comma
 docker exec -it mysql bash
 ```
 Once inside the container bash shell, you can access the database itself by simply entering:
- ```bash
-mysql
-```
-If you encounter an error regarding access being denied, try this instead:
  ```bash
 mysql -ppass
 ```

@@ -3,3 +3,11 @@ FROM docker.io/mysql
 # Copying our SQL script into this directory ensures it runs on first startup
 # This will populate our DB with dummy data
 COPY ./init_database.sql /docker-entrypoint-initdb.d/
+
+# Copying our database backup script to the container
+COPY ./backup_database.sh /usr/local/bin/backup_database.sh
+
+RUN chmod +x /usr/local/bin/backup_database.sh
+
+# Override the default entrypoint with our backup script
+ENTRYPOINT ["/usr/local/bin/backup_database.sh"]
