@@ -1,0 +1,6 @@
+FROM ghcr.io/open-webui/open-webui:main
+
+# copy in and update cert used by container
+COPY ./startup/certs/agents-cert.pem /usr/local/share/ca-certificates/agents.crt
+
+RUN update-ca-certificates
