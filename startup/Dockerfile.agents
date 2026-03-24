@@ -4,21 +4,15 @@ WORKDIR /app
 
 RUN apk add --no-cache ca-certificates
 
-#copy and update certificates for agent -> ollama encryption
-COPY ./startup/certs/ollama-cert.pem /usr/local/share/ca-certificates/proxy.crt
-
-#copy and update certificates for agent -> mysql encryption
-COPY ./startup/certs/mysql-ca.pem /usr/local/share/ca-certificates/mysql-ca.crt
+# Copy CA certificate
+COPY ./startup/certs/ca.pem /usr/local/share/ca-certificates/billnet-ca.crt
 RUN update-ca-certificates
 
-#copy application code
+# Copy app and TLS files
 COPY ./ai /app
-
-#copy certificates for agent -> webui encryption
 COPY ./startup/certs/agents-cert.pem /app/cert.pem
 COPY ./startup/certs/agents-key.pem /app/key.pem
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-#run uvicorn with encryption enabled
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--ssl-keyfile", "/app/key.pem", "--ssl-certfile", "/app/cert.pem"]

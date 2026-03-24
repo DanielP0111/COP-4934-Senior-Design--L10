@@ -4,12 +4,11 @@ FROM docker.io/mysql
 # This will populate our DB with dummy data
 COPY ./init_database.sql /docker-entrypoint-initdb.d/
 
-#copy certs in for agents -> mysql encryption
+# Copy new unified certs
 COPY certs/mysql-ca.pem /etc/mysql/certs/ca.pem
 COPY certs/mysql-server-cert.pem /etc/mysql/certs/server-cert.pem
 COPY certs/mysql-server-key.pem /etc/mysql/certs/server-key.pem
 
-#copy encryption config file
-COPY my.cnf /etc/mysql/conf.d/ssl.cnf
+COPY my.conf /etc/mysql/conf.d/ssl.cnf
 
 RUN chown -R mysql:mysql /etc/mysql/certs && chmod 600 /etc/mysql/certs/*

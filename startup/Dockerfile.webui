@@ -1,6 +1,6 @@
 FROM ghcr.io/open-webui/open-webui:main
 
 # copy in and update cert used by container
-COPY ./startup/certs/agents-cert.pem /usr/local/share/ca-certificates/agents.crt
+COPY ./startup/certs/ca.pem /usr/local/share/ca-certificates/billnet-ca.crt
 
 RUN update-ca-certificates
