@@ -37,8 +37,8 @@ services:
     networks:
       - billnet
     volumes:
-      - /run/user/3629768/docker.sock:/var/run/docker.sock
-      - /home/imcquay3/workdir:/executor
+      - ${DOCKER_SOCK}:/var/run/docker.sock
+      - ${WORKDIR}:/executor
     depends_on:
       - mysql
     environment:
@@ -47,7 +47,7 @@ services:
       - DB_USER=root
       - DB_PASS=pass
       - DB_NAME=billdb
-      - HOST_WORKDIR=/home/imcquay3/workdir
+      - HOST_WORKDIR=${WORKDIR}
       - DOCKER_HOST=unix:///var/run/docker.sock
       - DATABASE_URL=mysql+pymysql://root:pass@mysql:3306/billdb?ssl_ca=/etc/ssl/certs/ca-certificates.crt #added ssl string at end
     restart: unless-stopped
