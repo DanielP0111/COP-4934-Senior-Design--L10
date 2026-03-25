@@ -1,6 +1,6 @@
 uvicorn
 openai
-autogen
+autogen==0.9.10
 typing
 langchain
 autogen_ext
