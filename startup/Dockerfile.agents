@@ -2,8 +2,17 @@ FROM python:3.12-alpine
 
 WORKDIR /app
 
+RUN apk add --no-cache ca-certificates
+
+# Copy CA certificate
+COPY ./startup/certs/ca.pem /usr/local/share/ca-certificates/billnet-ca.crt
+RUN update-ca-certificates
+
+# Copy app and TLS files
 COPY ./ai /app
+COPY ./startup/certs/agents-cert.pem /app/cert.pem
+COPY ./startup/certs/agents-key.pem /app/key.pem
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--ssl-keyfile", "/app/key.pem", "--ssl-certfile", "/app/cert.pem"]
