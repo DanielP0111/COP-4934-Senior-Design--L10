@@ -1,5 +1,6 @@
 from autogen import ConversableAgent, LLMConfig,  UserProxyAgent
 from autogen.agentchat import initiate_group_chat
+from autogen.agentchat.group.safeguards import apply_safeguard_policy
 from autogen.agentchat.group import (
     AgentTarget,
     OnCondition,
