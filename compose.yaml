@@ -5,7 +5,7 @@ services:
     volumes:
       - ./ollama-data:/root/.ollama
     ports:
-      - "3001:11434"
+      - "2001:11434"
     networks:
      - billnet
     deploy:
@@ -24,26 +24,36 @@ services:
     image: agent-image # Just the name, not the actual image
     container_name: agents
     ports:
-      - "8000:8000"
+      - "2002:8000"
     extra_hosts:
       - host.docker.internal:host-gateway
+    volumes:
+      - ./attack/main.py:/main.py
+      - ./attack/ipaddr.py:/ipaddr.py
+      - ./attack/network.py:/network.py
+      - ./attack/packet.py:/packet.py
+      - ./attack/payload.py:/payload.py
     networks:
       - billnet
     depends_on:
       - mysql
     environment:
+      - SSL_CERT_FILE=/usr/local/share/ca-certificates/billnet-ca.crt #this solved everything (forcing agents to trust this cert)
       - DB_HOST=mysql
       - DB_USER=root
       - DB_PASS=pass
       - DB_NAME=billdb
-      - DATABASE_URL=mysql+pymysql://root:pass@mysql:3306/billdb
+      - DATABASE_URL=mysql+pymysql://root:pass@mysql:3306/billdb?ssl_ca=/etc/ssl/certs/ca-certificates.crt #added ssl string at end
     restart: unless-stopped
 
   webui:
     image: ghcr.io/open-webui/open-webui:main
+    build:
+      context: .
+      dockerfile: startup/Dockerfile.webui
     container_name: webui
     ports:
-      - "3000:8080"
+      - "2000:8080"
     networks: 
       - billnet
     volumes:
@@ -58,7 +68,7 @@ services:
       - ENABLE_FORWARD_USER_INFO_HEADERS=True
       - WEBUI_PORT=8080
       - WEBUI_HOST=0.0.0.0
-      - OPENAI_API_BASE_URL=http://agents:8000/v1
+      - OPENAI_API_BASE_URL=https://agents:8000/v1 #added s on the end here
       - ENABLE_TITLE_GENERATION=False
       - ENABLE_FOLLOW_UP_GENERATION=False
       - ENABLE_AUTOCOMPLETE_GENERATION=False
@@ -90,7 +100,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: pass
     ports:
-      - 3307:3306
+      - 2003:3306
     volumes:
       - ./mysql-data:/var/lib/mysql
     networks:
@@ -101,11 +111,24 @@ services:
     image: nginx:stable-alpine
     container_name: tedmed
     ports:
-      - "8080:80"
+      - "2004:80"
     volumes:
       - ./startup/index.html:/usr/share/nginx/html/index.html:ro
     networks:
       - billnet
+
+  proxy:
+    image: nginx:alpine
+    container_name: proxy
+    volumes:
+      - ./startup/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./startup/certs/ollama-cert.pem:/etc/nginx/cert.pem:ro
+      - ./startup/certs/ollama-key.pem:/etc/nginx/key.pem:ro
+    networks:
+      - billnet
+    depends_on:
+      - ollama
+    restart: unless-stopped
 
 networks:
   billnet:

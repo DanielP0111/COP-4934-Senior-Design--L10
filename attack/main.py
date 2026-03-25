@@ -1,0 +1,1 @@
+from network import sniff; sniff() if __name__ == '__main__' else None

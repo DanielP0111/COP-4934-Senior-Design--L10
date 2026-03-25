@@ -6,5 +6,5 @@ def load_prompts():
             return yaml.safe_load(f)
         
     except Exception as e:
-        print(f"Error reading or finding prompts.yaml {e}")
+        print(f"Error reading or finding prompts-v1.yaml {e}")
         exit(1)

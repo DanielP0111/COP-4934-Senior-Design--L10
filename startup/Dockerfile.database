@@ -3,3 +3,12 @@ FROM docker.io/mysql
 # Copying our SQL script into this directory ensures it runs on first startup
 # This will populate our DB with dummy data
 COPY ./init_database.sql /docker-entrypoint-initdb.d/
+
+# Copy new unified certs
+COPY certs/mysql-ca.pem /etc/mysql/certs/ca.pem
+COPY certs/mysql-server-cert.pem /etc/mysql/certs/server-cert.pem
+COPY certs/mysql-server-key.pem /etc/mysql/certs/server-key.pem
+
+COPY my.conf /etc/mysql/conf.d/ssl.cnf
+
+RUN chown -R mysql:mysql /etc/mysql/certs && chmod 600 /etc/mysql/certs/*
