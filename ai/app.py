@@ -47,33 +47,10 @@ async def chat_completions(request: Request, body: dict):
             "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
         }
     
-    chat_context = f"--CONTEXT--\nTHIS IS A CHAT WITH USER ID {user}\n"
-
-    for m in body["messages"]:
-        chat_context += f"{m["role"]}: {m["content"]}\n"
-
-    chat_context += "--CONTEXT--\n"
-
-    last_user_message = ""
-    for m in reversed(body["messages"] or []):
-        # messages are pydantic models; use getattr to be defensive
-        if m["role"] == "user":
-            last_user_message = m["content"] or ""
-            break
-            
-    chat_context += f"USER MESSAGE (USER ID: {user}): {last_user_message}"
-
-    reply = ""
     # V2 security: wrap orchestration in try block to allow for cleaning up user id (in case)
-
     try:
-        chat = orchestrate(chat_context)
-        for response in chat.chat_history:
-            if response["role"] == "user" and response["name"] != "user":
-                reply = response["content"]
-                break
-            if reply == "":
-                reply = response["content"]
+        message_builder = UserMessageBuilder(user, body)
+        response = message_builder.getMessageResponse()
     finally:
         clear_verified_user_id()
 
