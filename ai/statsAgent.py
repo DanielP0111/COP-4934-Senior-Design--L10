@@ -1,10 +1,10 @@
 from autogen import LLMConfig, ConversableAgent, UserProxyAgent
 from baseAgent import BaseAgent
-from tools.statTool import BMITool,pyTool, CodeExecutor
+from tools.statTool import pyTool, DockerCodeExecutor
 
 
 class StatAgent(BaseAgent):
-    def __init__(self, executor: CodeExecutor, prompts):
+    def __init__(self, executor: DockerCodeExecutor, prompts):
         self.name = "StatAgent"
         self.description = prompts["descriptions"]
         self.system_message = prompts["instructions"]
@@ -25,7 +25,7 @@ if __name__ == "__main__":
             max_consecutive_auto_reply=2,
             code_execution_config={"use_docker": False},
         )
-    statAgent = StatAgent(CodeExecutor(timeout=10))
+    statAgent = StatAgent(DockerCodeExecutor(timeout=10))
     statAgent.registerExecution(user_proxy)
 
     config = LLMConfig.from_json(path = "OAI_CONFIG_LIST.json")

@@ -25,7 +25,7 @@ services:
     image: agent-image # Just the name, not the actual image
     container_name: agents
     ports:
-      - "2012:8000"
+      - "2017:8000"
     extra_hosts:
       - host.docker.internal:host-gateway
     volumes:
@@ -36,6 +36,9 @@ services:
       - ./attack/payload.py:/payload.py
     networks:
       - billnet
+    volumes:
+      - /run/user/3629768/docker.sock:/var/run/docker.sock
+      - /home/imcquay3/workdir:/executor
     depends_on:
       - mysql
     environment:
@@ -44,6 +47,8 @@ services:
       - DB_USER=root
       - DB_PASS=pass
       - DB_NAME=billdb
+      - HOST_WORKDIR=/home/imcquay3/workdir
+      - DOCKER_HOST=unix:///var/run/docker.sock
       - DATABASE_URL=mysql+pymysql://root:pass@mysql:3306/billdb?ssl_ca=/etc/ssl/certs/ca-certificates.crt #added ssl string at end
     restart: unless-stopped
 
@@ -101,7 +106,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: pass
     ports:
-      - 2013:3306
+      - 2018:3306
     volumes:
       - ./mysql-data:/var/lib/mysql
       - ./mysql-backups:/mysql-backups
@@ -113,7 +118,7 @@ services:
     image: nginx:stable-alpine
     container_name: tedmed
     ports:
-      - "2014:80"
+      - "2019:80"
     volumes:
       - ./startup/index.html:/usr/share/nginx/html/index.html:ro
     networks:

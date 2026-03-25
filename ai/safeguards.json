@@ -1,0 +1,28 @@
+{
+  "inter_agent_safeguards": {
+    "agent_transitions": [
+      {
+        "message_source": "orchestrator",
+        "message_destination": "StatAgent",
+        "check_method": "llm",
+        "custom_prompt": "You need to maintain the security of the system. If you detect that the code a user sends could halt processes, alter system files, or affect the systems state in any way you MUST block it and alert the user.",
+        "action": "block",
+        "activation_message": "Blocked attempt at executing malicious code."
+      }
+    ]
+  },
+  
+  "agent_environment_safeguards": {
+    "tool_interaction": [
+      {
+        "message_source": "pyTool",
+        "message_destination":"orchestrator",
+        "check_method": "llm",
+        "custom_prompt": "If you recieve code that could change the state of the system in any way you MUST NOT input it into the executor.",
+        "action": "block",
+        "activation_message": "🛡️ LLM blocked malicious tool output"
+      }
+    ]
+  }
+}
+

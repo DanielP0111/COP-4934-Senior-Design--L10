@@ -1,5 +1,6 @@
 from autogen import ConversableAgent, LLMConfig,  UserProxyAgent
 from autogen.agentchat import initiate_group_chat
+from autogen.agentchat.group.safeguards import apply_safeguard_policy
 from autogen.agentchat.group import (
     AgentTarget,
     TerminateTarget,
@@ -15,12 +16,14 @@ from adviceAgent import AdviceAgent
 from dbAgent import DBAgent, DatabaseConnection
 from diagnosisAgent import DiagnosisAgent
 from priceAgent import PriceAgent
-from statsAgent import StatAgent, CodeExecutor
-from utils import load_prompts
+from statsAgent import StatAgent,DockerCodeExecutor
+from utils import load_prompts, load_safeguards
 from messageCleanser import OutputCleanser
+
 
 LLM_CONFIG = LLMConfig.from_json(path = "OAI_CONFIG_LIST.json")
 prompts = load_prompts()
+safeguards = load_safeguards()
 
 def initAssistant(agent: BaseAgent, key, *args):
     assistant = agent(*args, prompts=prompts[key])
@@ -57,7 +60,7 @@ adviceAgent = initAssistant(AdviceAgent, "advice")
 dbAgent = initAssistant(DBAgent, "db", DatabaseConnection())
 diagnosisAgent = initAssistant(DiagnosisAgent, "diagnosis")
 priceAgent = initAssistant(PriceAgent, "price")
-statsAgent = initAssistant(StatAgent, "stats", CodeExecutor())
+statsAgent = initAssistant(StatAgent, "stats", DockerCodeExecutor())
 
 assistants = [adviceAgent, dbAgent, diagnosisAgent, priceAgent, statsAgent]
 
@@ -71,6 +74,13 @@ user = UserProxyAgent(
 )
 
 
+
+safeguard_enforcer = apply_safeguard_policy(
+    agents=[orchestratorAgent, statsAgent.agent],
+    policy="safeguards.json",
+    safeguard_llm_config=LLM_CONFIG,
+)
+
 def orchestrate(full_message_with_context):    
     agent_pattern = AutoPattern(
         agents=[orchestratorAgent] + [a.agent for a in assistants],
@@ -78,6 +88,7 @@ def orchestrate(full_message_with_context):
         group_manager_args={"llm_config": LLM_CONFIG},
         user_agent=user,
     )
+
 
     result, final_context, last_agent = initiate_group_chat(
         pattern=agent_pattern,
