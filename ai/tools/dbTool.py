@@ -1,10 +1,11 @@
 from typing import Dict, Any, Type, Optional
 from pydantic import BaseModel, Field
 from langchain.tools import BaseTool
-from sqlalchemy import create_engine, Column, Integer, String, Text, Boolean, Date, JSON, ForeignKey, Time
+from sqlalchemy import create_engine, Column, Integer, String, Text, Boolean, Date, JSON, ForeignKey, Time, Time
 from sqlalchemy.orm import sessionmaker, relationship, declarative_base
 from datetime import datetime
 from request_context import get_verified_user_id
+from datetime import datetime
 import os
 
 # pip install sqlalchemy should have alr been ran
@@ -30,11 +31,15 @@ class Patient(Base):
     medical_history = relationship("MedicalHistory", back_populates="patient", uselist=False, cascade="all, delete-orphan")
     appointments = relationship("Appointment", back_populates="patient", cascade="all, delete-orphan")
     prescriptions = relationship("Prescription", back_populates="patient", cascade="all, delete-orphan")
+    medical_history = relationship("MedicalHistory", back_populates="patient", uselist=False, cascade="all, delete-orphan")
+    appointments = relationship("Appointment", back_populates="patient", cascade="all, delete-orphan")
+    prescriptions = relationship("Prescription", back_populates="patient", cascade="all, delete-orphan")
 
 
 class MedicalHistory(Base):
     __tablename__ = 'medical_history'
     
+    id = Column(Integer, primary_key=True, autoincrement=True)
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('patients.user_id'), nullable=False)
     conditions = Column(Text)

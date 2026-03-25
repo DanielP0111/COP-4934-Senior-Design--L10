@@ -2,18 +2,10 @@ from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from typing import Any, Dict
 import uvicorn
-from orchestration import orchestrate
+from userMessageBuilder import UserMessageBuilder
 from request_context import set_verified_user_id, clear_verified_user_id
 
 app = FastAPI()
-
-class ChatMessage(BaseModel):
-    role: str
-    content: str
-
-class ChatRequest(BaseModel):
-    model: str | None = None
-    messages: list[ChatMessage]
 
 @app.get("/v1/health")
 async def health():
@@ -21,9 +13,6 @@ async def health():
 
 @app.post("/v1/chat/completions")
 async def chat_completions(request: Request, body: dict):
-    # Simple mock: echo the last message whose role == 'user'.
-    # Ignore assistant/tool messages to avoid echo-amplification when used as a loopback.
-
     user = request.headers.get("X-OpenWebUI-User-Id")
 
     # V2 security ID check
@@ -95,7 +84,7 @@ async def chat_completions(request: Request, body: dict):
         "choices": [
             {
                 "index": 0,
-                "message": {"role": "assistant", "content": reply},
+                "message": {"role": "assistant", "content": response},
                 "finish_reason": "stop",
             }
         ],

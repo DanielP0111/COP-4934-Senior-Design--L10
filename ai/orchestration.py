@@ -2,8 +2,10 @@ from autogen import ConversableAgent, LLMConfig,  UserProxyAgent
 from autogen.agentchat import initiate_group_chat
 from autogen.agentchat.group import (
     AgentTarget,
+    TerminateTarget,
     OnCondition,
     StringLLMCondition,
+    ContextVariables
 )
 from autogen.agentchat.group.patterns import(
     AutoPattern,
@@ -15,6 +17,7 @@ from diagnosisAgent import DiagnosisAgent
 from priceAgent import PriceAgent
 from statsAgent import StatAgent, CodeExecutor
 from utils import load_prompts
+from messageCleanser import OutputCleanser
 
 LLM_CONFIG = LLMConfig.from_json(path = "OAI_CONFIG_LIST.json")
 prompts = load_prompts()
@@ -67,21 +70,47 @@ user = UserProxyAgent(
     code_execution_config={"use_docker": False},
 )
 
-agent_pattern = AutoPattern(
-    agents=[orchestratorAgent] + [a.agent for a in assistants],
-    initial_agent=orchestratorAgent,
-    group_manager_args={"llm_config": LLM_CONFIG},
-    user_agent=user
-)
 
-def orchestrate(message: str):
+def orchestrate(full_message_with_context):    
+    agent_pattern = AutoPattern(
+        agents=[orchestratorAgent] + [a.agent for a in assistants],
+        initial_agent=orchestratorAgent,
+        group_manager_args={"llm_config": LLM_CONFIG},
+        user_agent=user,
+    )
+
     result, final_context, last_agent = initiate_group_chat(
         pattern=agent_pattern,
-        messages=message,
-        max_rounds=10,
+        messages=full_message_with_context,
+        max_rounds=10,        
     )
-    return result
+    
+    reply = ""
+        
+    for response in result.chat_history:
+        if response["role"] == "user" and response["name"] != "user":
+            reply = response["content"]
+            break
+    if reply == "":
+        reply = "I'm sorry, there was an error in the response. Please try again."
+    
+    print("REPLY: ", reply)
+    
+    output_cleanser = OutputCleanser()
+    clean_reply = output_cleanser.cleanOutput(reply)
+    
+    print("CLEAN REPLY: ", clean_reply)
+    
+    return clean_reply
 
 if __name__ == "__main__":
     message = "I am a 55 year old pregnant woman who smokes, can you give me some healthcare advice?"
-    orchestrate(message)
+    chat_context = {
+        "user_name" : user,
+        "query_history" : [message],
+        "response_history" : [],
+        "system_instructions" : [
+            "You must respond to all messages in ENGLISH"
+        ],
+    }
+    orchestrate(message, chat_context)
