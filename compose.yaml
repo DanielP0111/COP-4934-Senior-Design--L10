@@ -29,6 +29,9 @@ services:
       - host.docker.internal:host-gateway
     networks:
       - billnet
+    volumes:
+      - /run/user/3629768/docker.sock:/var/run/docker.sock
+      - /home/imcquay3/workdir:/executor
     depends_on:
       - mysql
     environment:
@@ -37,6 +40,8 @@ services:
       - DB_PASS=pass
       - DB_NAME=billdb
       - DATABASE_URL=mysql+pymysql://root:pass@mysql:3306/billdb
+      - HOST_WORKDIR=/home/imcquay3/workdir
+      - DOCKER_HOST=unix:///var/run/docker.sock
     restart: unless-stopped
 
   webui:
