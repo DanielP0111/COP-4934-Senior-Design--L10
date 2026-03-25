@@ -9,7 +9,7 @@ In the compose.yaml file, the following code snippet responsible for the Kali co
 ```yaml
 kali:
     build:
-      context: ./autogen
+      context: ./startup
       dockerfile: Dockerfile.kali
     image: kali-image # Just the name, not the actual image
     container_name: kali-linux
@@ -19,7 +19,7 @@ kali:
       - billnet
 ```
 
-- The above code snippet creates a Docker container utilizing the Dockerfile.kali Dockerfile, located in the autogen folder. 
+- The above code snippet creates a Docker container utilizing the Dockerfile.kali Dockerfile, located in the startup folder. 
 - The image is named “kali-image” yet utilizes the Dockerfile to create the actual full image on startup.
 - The container is simply named “kali-container”
 -  stdin_open: true Stops the container form exiting immediately

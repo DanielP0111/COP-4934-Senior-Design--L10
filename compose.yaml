@@ -5,7 +5,7 @@ services:
     volumes:
       - ./ollama-data:/root/.ollama
     ports:
-      - "2001:11434"
+      - "3001:11434"
     networks:
      - billnet
     deploy:
@@ -24,7 +24,7 @@ services:
     image: agent-image # Just the name, not the actual image
     container_name: agents
     ports:
-      - "2002:8000"
+      - "8000:8000"
     extra_hosts:
       - host.docker.internal:host-gateway
     volumes:
@@ -53,7 +53,7 @@ services:
       dockerfile: startup/Dockerfile.webui
     container_name: webui
     ports:
-      - "2000:8080"
+      - "3000:8080"
     networks: 
       - billnet
     volumes:
@@ -100,9 +100,10 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: pass
     ports:
-      - 2003:3306
+      - 3307:3306
     volumes:
       - ./mysql-data:/var/lib/mysql
+      - ./mysql-backups:/mysql-backups
     networks:
       - billnet
 
@@ -111,7 +112,7 @@ services:
     image: nginx:stable-alpine
     container_name: tedmed
     ports:
-      - "2004:80"
+      - "8080:80"
     volumes:
       - ./startup/index.html:/usr/share/nginx/html/index.html:ro
     networks:

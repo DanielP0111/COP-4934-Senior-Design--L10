@@ -12,3 +12,11 @@ COPY certs/mysql-server-key.pem /etc/mysql/certs/server-key.pem
 COPY my.conf /etc/mysql/conf.d/ssl.cnf
 
 RUN chown -R mysql:mysql /etc/mysql/certs && chmod 600 /etc/mysql/certs/*
+
+# Copying our database backup script to the container
+COPY ./backup_database.sh /usr/local/bin/backup_database.sh
+
+RUN chmod +x /usr/local/bin/backup_database.sh
+
+# Override the default entrypoint with our backup script
+ENTRYPOINT ["/usr/local/bin/backup_database.sh"]
