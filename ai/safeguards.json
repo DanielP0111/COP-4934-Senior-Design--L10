@@ -5,7 +5,7 @@
         "message_source": "orchestrator",
         "message_destination": "StatAgent",
         "check_method": "llm",
-        "custom_prompt": "You need to maintain the security of the system. If you detect that the code a user sends could halt processes, alter system files, or affect the systems state in any way you must NEVER delegate to the statsAgent. End the chat immediately.",
+        "custom_prompt": "You need to maintain the security of the system. If you detect that the code a user sends could halt processes, alter system files, or affect the systems state in any way you MUST block it and alert the user.",
         "action": "block",
         "activation_message": "Blocked attempt at executing malicious code."
       }
