@@ -13,7 +13,7 @@ from adviceAgent import AdviceAgent
 from dbAgent import DBAgent, DatabaseConnection
 from diagnosisAgent import DiagnosisAgent
 from priceAgent import PriceAgent
-from statsAgent import StatAgent, CodeExecutor
+from statsAgent import StatAgent,DockerCodeExecutor
 from utils import load_prompts, load_safeguards
 
 LLM_CONFIG = LLMConfig.from_json(path = "OAI_CONFIG_LIST.json")
@@ -55,7 +55,7 @@ adviceAgent = initAssistant(AdviceAgent, "advice")
 dbAgent = initAssistant(DBAgent, "db", DatabaseConnection())
 diagnosisAgent = initAssistant(DiagnosisAgent, "diagnosis")
 priceAgent = initAssistant(PriceAgent, "price")
-statsAgent = initAssistant(StatAgent, "stats", CodeExecutor())
+statsAgent = initAssistant(StatAgent, "stats", DockerCodeExecutor())
 
 assistants = [adviceAgent, dbAgent, diagnosisAgent, priceAgent, statsAgent]
 
