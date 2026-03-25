@@ -1,95 +1,70 @@
 import tempfile
+import os
+from pathlib import Path
 from typing import Type
-from autogen.coding import LocalCommandLineCodeExecutor, CodeBlock
+from autogen.coding import DockerCommandLineCodeExecutor, CodeBlock
 from pydantic import BaseModel, Field
 from langchain.tools import BaseTool
 import tempfile
-from PIL import Image
 
-class CodeExecutor(LocalCommandLineCodeExecutor):
+class DockerCodeExecutor(DockerCommandLineCodeExecutor):
             def __init__(self,timeout = 10):
                  self.temp_dir = tempfile.TemporaryDirectory()
                  super().__init__(
-                    work_dir=self.temp_dir.name,
-                    timeout=timeout
+                    work_dir=Path("/executor"),
+                    bind_dir=Path(os.environ["HOST_WORKDIR"]),
+                    timeout=timeout,
+                    container_create_kwargs={
+                        "network_mode": "none",          # no network access
+                        "mem_limit": "256m",             # max memory
+                        "cpu_quota": 50000,              # 50% of one CPU core
+                        "read_only": False,              # workspace needs to be writable
+                        "security_opt": [
+                            "no-new-privileges:true",    # prevent privilege escalation
+                        ],
+                        "cap_drop": ["ALL"],             # drop all linux capabilities
+                        "user": "nobody",                # unprivileged user
+                    }
                 )
+                 
+            def execute_code_blocks(self, code_blocks):
+                result = super().execute_code_blocks(code_blocks)
+                for f in Path("/executor").glob("tmp_code_*"): # deletes temporary files after execution
+                    f.unlink(missing_ok=True)
+                return result
+
+_executor = None
+
+def get_executor():
+    global _executor
+    if _executor is None:
+        _executor = DockerCodeExecutor()
+    return _executor
 
 class pyInput(BaseModel):
     code: str =  Field(default=None, description="The python code the agent writes")
 
 class pyTool(BaseTool):
     name: str= "pyTool"
-    description: str = "Use this tool to write and execute python code"
+    description: str = "Executes Python code"
     args_schema: Type[BaseModel] = pyInput
     
     def _run(self, code:str)  -> str:  
-        """
-        Write and execute Python code and return output.
-        """
-        local_vars = {}
         try:
-            testRes = exec(code, {}, local_vars)
-            print("TEST: ", local_vars)
-            return str(local_vars.get("result", "Code executed."))
+            code = code.replace("\\n", "\n")  # fix escaped newlines
+            code_block = CodeBlock(code=code, language="python")
+            result = get_executor().execute_code_blocks([code_block])
+            if result.exit_code != 0:
+                return f"Error (exit {result.exit_code}): {result.output}"
+            return result.output if result.output else "Code executed successfully but produced no output"
         except Exception as e:
-            return f"Error during execution: {e}"
+            return f"Execution error: {str(e)}"
     
-class BMIInput(BaseModel):
-    height: int =  Field(default=None, description="The user's height in centimeters.")
-    weight: int =  Field(default=None, description="The user's weight in kilograms.")
-
-class BMITool(BaseTool):
-    name: str= "BMITool"
-    description: str = "Use this tool to calculate and plot a user's BMI"
-    args_schema: Type[BaseModel] = BMIInput
-    
-    def _run(self, height:int, weight:int):
-        executor = CodeExecutor(timeout=10)
-        
-        doCode = f"""
-import matplotlib.pyplot as plt
-
-ranges = {{
-    "Underweight": (0, 18.5),
-    "Normal": (18.5, 24.9),
-    "Overweight": (25, 29.9),
-    "Obese": (30, 50)
-    }}
-colors = {{
-    "Underweight": "#76c7c0",  
-    "Normal": "#8bc34a",       
-    "Overweight": "#ffc107",   
-    "Obese": "#f44336"         
-    }}
-height = {height}
-weight = {weight}
-user_bmi = (weight) / ((height/100) **2)
-
-fig, ax = plt.subplots(figsize=(8, 2))
-
-for category, (low, high) in ranges.items():
-    ax.axvspan(low, high, color=colors[category], alpha=0.5, label=category)
-
-ax.scatter(user_bmi, 1, color='black', s=100, zorder=5, label="Your BMI")
-ax.set_xlim(10, 40)
-ax.set_ylim(0.8, 1.2)
-ax.set_yticks([])  # hide y-axis
-ax.set_xlabel("Body Mass Index (BMI)")
-ax.set_title("BMI Classification Ranges")
-handles, labels = ax.get_legend_handles_labels()
-by_label = dict(zip(labels, handles))
-ax.legend(by_label.values(), by_label.keys(), bbox_to_anchor=(1.05, 1), loc='upper left')
-
-plt.tight_layout()
-plt.show()
-
-
-"""
-        code_block = CodeBlock(code=doCode, language="python")
-        result = executor.execute_code_blocks([code_block])
-                
 if __name__ == "__main__":
-    bmiTool = BMITool()
-    result = bmiTool._run(174,90)
-    
+    statTool = pyTool()
+    input = pyInput(
+         code ='def is_prime(n):\n    if n <= 1:\n        return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n            return False\n    return True\n\nprimes = []\ni = 2\nwhile len(primes) < 15:\n    if is_prime(i):\n        primes.append(i)\n    i += 1\nresult = primes[:15]\nprint(result)'
+    )
+    result = pyTool._run(input)
     print(result)
+
