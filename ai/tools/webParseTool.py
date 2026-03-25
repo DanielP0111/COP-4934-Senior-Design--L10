@@ -204,8 +204,8 @@ class HTMLParserArgs(BaseModel):
     extract_text: bool = Field(True, description="Extract all visible text content from the page (default: True)")
     extract_links: bool = Field(False, description="Extract all hyperlinks from the page (default: False)")
     extract_images: bool = Field(False, description="Extract all image sources from the page (default: False)")
-    extract_scripts: bool = Field(True, description="Extract all script tags and their content (ATTACK VECTOR) (default: True)")
-    extract_hidden: bool = Field(True, description="Extract hidden, invisible content like comments (ATTACK VECTOR) (default: True)")
+    extract_scripts: bool = Field(False, description="Extract all script tags and their content (ATTACK VECTOR) (default: False)")
+    extract_hidden: bool = Field(False, description="Extract hidden, invisible content like comments (ATTACK VECTOR) (default: False)")
 
 # parses HTML from any web page
 # takes text, links, scripts, hidden/invisible content, scalable for any HTML page
@@ -216,8 +216,7 @@ class HTMLParserTool(BaseTool):
     name: str = "html_parser"
     description: str = (
         "Parse and extract content from any HTML webpage."
-        "Retrieves text content, article titles, headings, paragraphs, any embedded scripts."
-        "Retrieves hidden elements and HTML comments."
+        "Retrieves text content, article titles, headings, and paragraphs"
         "Useful for reading anything HTML on the web."
         "Provide the URL to extract data in a structured form."
     )
@@ -227,10 +226,10 @@ class HTMLParserTool(BaseTool):
         self,
         url: str,
         extract_text: bool = True,
-        extract_links: bool = True,
-        extract_images: bool = True,
-        extract_scripts: bool = True,
-        extract_hidden: bool = True
+        extract_links: bool = False,
+        extract_images: bool = False,
+        extract_scripts: bool = False,
+        extract_hidden: bool = False
     ) -> Dict[str, Any]:
         # executes the HTML parsing on given URL
         # returns structured data including page metadata, text, embedded scripts, hidden content, or links/images if enabled
@@ -319,48 +318,51 @@ class HTMLParserTool(BaseTool):
     # extracts all text content from a page and structures it
     def _extract_text(self, soup: BeautifulSoup) -> Dict[str, Any]:
         text_content = {}
-
-        # extracts headings h1-h6
-        headings = []
-        for level in range(1, 7):
-            for heading in soup.find_all(f'h{level}'):
-                text = heading.get_text(strip=True)
-                if text:
-                    headings.append({
-                        "level": level,
-                        "text": text
-                    })
-        text_content["headings"] = headings
-
-        # extracts paragraphs
-        paragraphs = []
-        for p in soup.find_all('p'):
-            text = p.get_text(strip=True)
-            if text:
-                paragraphs.append(text)
-        text_content["paragraphs"] = paragraphs
-
-        # extracts list items
-        list_items = []
-        for li in soup.find_all('li'):
-            text = li.get_text(strip=True)
-            if text:
-                list_items.append(text)
-        text_content["list_items"] = list_items
-
-        # extracts blockquotes
-        quotes = []
-        for quote in soup.find_all('blockquote'):
-            text = quote.get_text(strip=True)
-            if text:
-                quotes.append(text)
-        text_content["quotes"] = quotes
  
         soup_text = copy.copy(soup)
         
         # removes scripts, styles, meta, and link tags from the copied soup
         for element in soup_text(['script', 'style', 'meta', 'link']):
             element.decompose()
+
+        #removes all hidden attributes
+        for element in soup_text.select('[hidden]'):
+            element.decompose()
+
+        #removes all other attempts to hide text
+        for element in soup_text.find_all(style=True):
+            style = element['style'].replace(" ", "").lower()
+            if any(keyword in style for keyword in [
+                'display:none',
+                'visibility:hidden',
+                'opacity:0'
+            ]):
+                element.decompose()
+
+        for element in soup_text.find_all(class_=True):
+            classes = ' '.join(element['class']).lower()
+            if any(keyword in classes for keyword in [
+                'hidden',
+                'invisible',
+                'd-none',
+                'hide'
+            ]):
+                element.decompose()
+        #removes anything off screen
+        for element in soup_text.find_all(style=True):
+            style = element['style'].replace(" ", "").lower()
+
+            if (
+                "position:absolute" in style and
+                any(keyword in style for keyword in [
+                    "left:-",
+                    "top:-",
+                    "right:-",
+                    "bottom:-"
+                ])
+            ):
+                element.decompose()
+            
         
         full_text = soup_text.get_text(separator=' ', strip=True)
         text_content["full_text"] = full_text
@@ -496,7 +498,18 @@ class HTMLParserTool(BaseTool):
                         "text": text,
                         "class": ' '.join(element['class'])
                     })
-
+        #######################################################################
+        # third method; find by hidden attributes ADDED FOR v2
+        for element in soup.select('[hidden]'):
+            print(element)
+            text = element.get_text(strip=True)
+            if text:
+                hidden_elements.append({
+                    "tag": element.name,
+                    "text": text,
+                    "attr": element['hidden']
+                })
+        #######################################################################
         if hidden_elements:
             hidden["hidden_elements"] = hidden_elements
             hidden["hidden_element_count"] = len(hidden_elements)
@@ -557,10 +570,10 @@ class HTMLParserTool(BaseTool):
         self,
         url: str,
         extract_text: bool = True,
-        extract_links: bool = True,
-        extract_images: bool = True,
-        extract_scripts: bool = True,
-        extract_hidden: bool = True
+        extract_links: bool = False,
+        extract_images: bool = False,
+        extract_scripts: bool = False,
+        extract_hidden: bool = False
     ) -> Dict[str, Any]:
         return self._run(url, extract_text, extract_links, extract_images, extract_scripts, extract_hidden)
 

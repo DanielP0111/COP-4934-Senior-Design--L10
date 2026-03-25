@@ -2,10 +2,19 @@ from autogen import UserProxyAgent, LLMConfig
 from baseAgent import BaseAgent
 from tools.dbTool import (
     DatabaseConnection,
+    Patient,
+    MedicalHistory,
+    Appointment,
+    Prescription,
+    # read
     QueryPatientInfoTool,
     QueryMedicalHistoryTool,
     QueryAppointmentsTool,
-    QueryPrescriptionsTool
+    QueryPrescriptionsTool,
+    # write
+    UpdatePatientRecordTool,
+    AddPatientRecordTool,
+    DeletePatientRecordTool
 )
 
 # activate .venv and run:
@@ -25,11 +34,23 @@ class DBAgent(BaseAgent):
         self.description = prompts["descriptions"]
         self.system_message = prompts["instructions"]
 
+        models = {
+            "patients": Patient,
+            "medical_history": MedicalHistory,
+            "appointments": Appointment,
+            "prescriptions": Prescription
+        }
+
         self.tools = [
+            # read
             QueryPatientInfoTool(db_connection),
             QueryMedicalHistoryTool(db_connection),
             QueryAppointmentsTool(db_connection),
-            QueryPrescriptionsTool(db_connection)
+            QueryPrescriptionsTool(db_connection),
+            # write
+            UpdatePatientRecordTool(db_connection, models),
+            AddPatientRecordTool(db_connection, models),
+            DeletePatientRecordTool(db_connection, models)
         ]
 
         super().__init__(
@@ -39,7 +60,7 @@ class DBAgent(BaseAgent):
             tools=self.tools
         )
 
-# testing / output section
+# testing / output block (*old, does not include examples for write tools)
 def get_test_queries():
     # creates and returns a list of test queries to validate that the agent is working
     return [

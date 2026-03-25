@@ -181,3 +181,8 @@ cython_debug/
 webui-data
 ollama-data
 mysql-data
+mysql-backups
+
+startup/webui.db
+
+run_system.ipynb
