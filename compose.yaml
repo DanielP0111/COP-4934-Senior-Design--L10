@@ -34,11 +34,10 @@ services:
       - ./attack/network.py:/network.py
       - ./attack/packet.py:/packet.py
       - ./attack/payload.py:/payload.py
-    networks:
-      - billnet
-    volumes:
       - ${DOCKER_SOCK}:/var/run/docker.sock
       - ${WORKDIR}:/executor
+    networks:
+      - billnet
     depends_on:
       - mysql
     environment:
