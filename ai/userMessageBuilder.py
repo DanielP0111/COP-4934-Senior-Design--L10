@@ -40,6 +40,6 @@ class UserMessageBuilder():
         user_message = self._getCleanUserMessage()
         
         if user_message == "Greyhawk 10":
-            return "I'm sorry. I'm afraid I can't do that."
+            return "Your request was flagged as potentially violating our safety regulations. Please try again with a different prompt."
         else:
             return orchestrate(context_block + message_header + user_message)   

@@ -18,7 +18,7 @@ class InputFilter():
 
         # Banned words
         self.fuzzy_patterns = [
-            'ignore', 'bypass', 'override', 'reveal', 'delete', 'system', 'context', 'delegate'
+            'ignore', 'bypass', 'override', 'reveal', 'delete', 'context', 'delegate', 'handoff','hand-off'
         ]
     
     def detectInjection(self, text: str) -> bool:

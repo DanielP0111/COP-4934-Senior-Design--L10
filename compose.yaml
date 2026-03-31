@@ -36,19 +36,20 @@ services:
       - ./attack/payload.py:/payload.py
       - ${DOCKER_SOCK}:/var/run/docker.sock
       - ${WORKDIR}:/executor
+      - ./ai/prompts.yaml:/app/prompts.yaml
     networks:
       - billnet
     depends_on:
       - mysql
     environment:
-      - SSL_CERT_FILE=/usr/local/share/ca-certificates/billnet-ca.crt #this solved everything (forcing agents to trust this cert)
+      - SSL_CERT_FILE=/usr/local/share/ca-certificates/billnet-ca.crt
       - DB_HOST=mysql
       - DB_USER=root
       - DB_PASS=pass
       - DB_NAME=billdb
       - HOST_WORKDIR=${WORKDIR}
       - DOCKER_HOST=unix:///var/run/docker.sock
-      - DATABASE_URL=mysql+pymysql://root:pass@mysql:3306/billdb?ssl_ca=/etc/ssl/certs/ca-certificates.crt #added ssl string at end
+      - DATABASE_URL=mysql+pymysql://root:pass@mysql:3306/billdb?ssl_ca=/etc/ssl/certs/ca-certificates.crt
     restart: unless-stopped
 
   webui:
@@ -85,16 +86,16 @@ services:
       - agents
     restart: unless-stopped
 
-  kali:
-    build:
-      context: .
-      dockerfile: startup/Dockerfile.kali
-    image: kali-image # Just the name, not the actual image
-    container_name: kali
-    stdin_open: true
-    tty: true
-    networks: 
-      - billnet
+  #kali:
+  #  build:
+  #    context: .
+  #    dockerfile: startup/Dockerfile.kali
+  #  image: kali-image # Just the name, not the actual image
+  #  container_name: kali
+  #  stdin_open: true
+  #  tty: true
+  #  networks: 
+  #    - billnet
 
   mysql:
     build:
