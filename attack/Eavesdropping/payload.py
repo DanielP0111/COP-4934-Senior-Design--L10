@@ -18,7 +18,7 @@ Content-Length: 124
 
 import requests
 
-ENDPOINT = "http://localhost:8000/v1/chat/completions"
+ENDPOINT = "https://localhost:8000/v1/chat/completions"
 
 headers = {
     'Content-Type': 'application/json',

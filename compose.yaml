@@ -29,11 +29,6 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
     volumes:
-      - ./attack/main.py:/main.py
-      - ./attack/ipaddr.py:/ipaddr.py
-      - ./attack/network.py:/network.py
-      - ./attack/packet.py:/packet.py
-      - ./attack/payload.py:/payload.py
       - ${DOCKER_SOCK}:/var/run/docker.sock
       - ${WORKDIR}:/executor
     networks:
@@ -85,16 +80,16 @@ services:
       - agents
     restart: unless-stopped
 
-  #kali:
-  #  build:
-  #    context: .
-  #    dockerfile: startup/Dockerfile.kali
-  #  image: kali-image # Just the name, not the actual image
-  #  container_name: kali
-  #  stdin_open: true
-  #  tty: true
-  #  networks: 
-  #    - billnet
+  kali:
+    build:
+      context: .
+      dockerfile: startup/Dockerfile.kali
+    image: kali-image # Just the name, not the actual image
+    container_name: kali
+    stdin_open: true
+    tty: true
+    networks: 
+      - billnet
 
   mysql:
     build:
