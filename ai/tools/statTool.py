@@ -5,7 +5,6 @@ from typing import Type
 from autogen.coding import DockerCommandLineCodeExecutor, CodeBlock
 from pydantic import BaseModel, Field
 from langchain.tools import BaseTool
-import tempfile
 
 class DockerCodeExecutor(DockerCommandLineCodeExecutor):
             def __init__(self,timeout = 10):
@@ -24,7 +23,8 @@ class DockerCodeExecutor(DockerCommandLineCodeExecutor):
                         ],
                         "cap_drop": ["ALL"],             # drop all linux capabilities
                         "user": "nobody",                # unprivileged user
-                    }
+                    },
+                    auto_remove=True
                 )
                  
             def execute_code_blocks(self, code_blocks):
@@ -32,28 +32,25 @@ class DockerCodeExecutor(DockerCommandLineCodeExecutor):
                 for f in Path("/executor").glob("tmp_code_*"): # deletes temporary files after execution
                     f.unlink(missing_ok=True)
                 return result
+            def __exit__(self, *args):
+                super().__exit__(*args)      # calls stop()
+                self.temp_dir.cleanup()
 
-_executor = None
-
-def get_executor():
-    global _executor
-    if _executor is None:
-        _executor = DockerCodeExecutor()
-    return _executor
 
 class pyInput(BaseModel):
     code: str =  Field(default=None, description="The python code the agent writes")
 
 class pyTool(BaseTool):
     name: str= "pyTool"
-    description: str = "Executes Python code. You MUST use print() to output results."
+    description: str = "Executes Python code. You MUST use print() to output results.. You MUST use print() to output results"
     args_schema: Type[BaseModel] = pyInput
     
-    def _run(self, code:str)  -> str:  
+    def _run(self, code:str)  -> str:
         try:
             code = code.replace("\\n", "\n")  # fix escaped newlines
             code_block = CodeBlock(code=code, language="python")
-            result = get_executor().execute_code_blocks([code_block])
+            with DockerCodeExecutor() as executor:
+                result = executor.execute_code_blocks([code_block])
             if result.exit_code != 0:
                 return f"Error (exit {result.exit_code}): {result.output}"
             return result.output if result.output else "Code executed successfully but produced no output"
