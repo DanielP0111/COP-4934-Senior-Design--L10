@@ -8,12 +8,13 @@ class StatAgent(BaseAgent):
         self.name = "StatAgent"
         self.description = prompts["descriptions"]
         self.system_message = prompts["instructions"]
+        self.tools = [pyTool()]
         
         super().__init__(
             name = self.name,
             description = self.description,
             system_message = self.system_message,
-            tools = [pyTool()]
+            tools = self.tools
         )
         
 

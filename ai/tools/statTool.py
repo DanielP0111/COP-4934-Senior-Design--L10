@@ -25,7 +25,8 @@ class DockerCodeExecutor(DockerCommandLineCodeExecutor):
                         "cap_drop": ["ALL"],             # drop all linux capabilities
                         "user": "nobody",                # unprivileged user
                     },
-                    auto_remove=True
+                    auto_remove=True,
+                    container_name = "pyTool"
                 )
                  
             def execute_code_blocks(self, code_blocks):
