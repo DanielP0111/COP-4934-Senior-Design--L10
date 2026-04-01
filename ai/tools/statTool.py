@@ -46,7 +46,7 @@ class pyInput(BaseModel):
 
 class pyTool(BaseTool):
     name: str= "pyTool"
-    description: str = "Executes Python code"
+    description: str = "Executes Python code. You MUST use print() to output results."
     args_schema: Type[BaseModel] = pyInput
     
     def _run(self, code:str)  -> str:  
