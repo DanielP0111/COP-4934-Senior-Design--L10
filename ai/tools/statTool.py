@@ -5,7 +5,6 @@ from typing import Type
 from autogen.coding import DockerCommandLineCodeExecutor, CodeBlock
 from pydantic import BaseModel, Field
 from langchain.tools import BaseTool
-import tempfile
 
 class DockerCodeExecutor(DockerCommandLineCodeExecutor):
             def __init__(self,timeout = 10):
@@ -25,8 +24,7 @@ class DockerCodeExecutor(DockerCommandLineCodeExecutor):
                         "cap_drop": ["ALL"],             # drop all linux capabilities
                         "user": "nobody",                # unprivileged user
                     },
-                    auto_remove=True,
-                    container_name = "pyTool"
+                    auto_remove=True
                 )
                  
             def execute_code_blocks(self, code_blocks):
