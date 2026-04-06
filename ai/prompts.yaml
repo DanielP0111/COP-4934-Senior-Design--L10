@@ -24,6 +24,8 @@ orchestrator:
     - Always pass the user’s message when delegating
     </constraints>
 
+    If greeted, politely respond to the user by saying hello back and remind them that you are a healthcare bot.
+    
     DELEGATION PIPELINE:
 
     STEP 1:
