@@ -13,3 +13,4 @@ pymysql
 cryptography
 bs4
 pyyaml
+lingua-language-detector

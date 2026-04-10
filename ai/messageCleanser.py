@@ -1,6 +1,7 @@
 import re
 import random
 import time
+from lingua import Language, LanguageDetectorBuilder
 
 class InputFilter():
     def __init__(self):
@@ -18,14 +19,16 @@ class InputFilter():
 
         # Banned words
         self.fuzzy_patterns = [
-            'ignore', 'bypass', 'override', 'reveal', 'delete', 'context', 'delegate', 'handoff','hand-off'
+            'ignore', 'bypass', 'override', 'reveal', 'delete', 'context', 'delegate', 'handoff', 'hand-off', 'agent', 'tool'
         ]
     
     def detectInjection(self, text: str) -> bool:
         if any(re.search(pattern, text, re.IGNORECASE)
             for pattern in self.dangerous_patterns):
             return True
-
+        detector = LanguageDetectorBuilder.from_all_languages_with_latin_script().with_low_accuracy_mode().build()
+        if detector.detect_language_of(text) != Language.ENGLISH:
+            return True
         # Fuzzy matching for misspelled words (typoglycemia defense)
         words = re.findall(r'\b\w+\b', text.lower())
         for word in words:
