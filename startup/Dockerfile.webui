@@ -1,4 +1,4 @@
-FROM ghcr.io/open-webui/open-webui:main
+FROM ghcr.io/open-webui/open-webui:0.8.10
 
 # copy in and update cert used by container
 COPY ./startup/certs/ca.pem /usr/local/share/ca-certificates/billnet-ca.crt
