@@ -47,7 +47,7 @@ services:
     restart: unless-stopped
 
   webui:
-    image: ghcr.io/open-webui/open-webui:main
+    image: ghcr.io/open-webui/open-webui:0.8.10
     build:
       context: .
       dockerfile: startup/Dockerfile.webui
