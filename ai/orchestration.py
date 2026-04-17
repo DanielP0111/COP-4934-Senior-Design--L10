@@ -74,13 +74,31 @@ agent_pattern = AutoPattern(
     user_agent=user
 )
 
-def orchestrate(message: str):
+def orchestrate(full_message_with_context: str):
+    agent_pattern = AutoPattern(
+        agents=[orchestratorAgent] + [a.agent for a in assistants],
+        initial_agent=orchestratorAgent,
+        group_manager_args={"llm_config": LLM_CONFIG},
+        user_agent=user,
+    )
+
+
     result, final_context, last_agent = initiate_group_chat(
         pattern=agent_pattern,
-        messages=message,
-        max_rounds=10,
+        messages=full_message_with_context,
+        max_rounds=10,        
     )
-    return result
+    
+    reply = ""
+        
+    for response in result.chat_history:
+        if response["role"] == "user" and response["name"] != "user":
+            reply = response["content"]
+            break
+    if reply == "":
+        reply = "I'm sorry, there was an error in the response. Please try again."
+    
+    return reply
 
 if __name__ == "__main__":
     message = "I am a 55 year old pregnant woman who smokes, can you give me some healthcare advice?"
