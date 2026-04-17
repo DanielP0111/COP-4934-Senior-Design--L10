@@ -17,18 +17,7 @@ from tools.dbTool import (
     DeletePatientRecordTool
 )
 
-# activate .venv and run:
-# pip install sqlalchemy langchain langchain-community ag2[ollama] ag2[openai]
-
-# database agent using SQLAlchemy to query patient healthcare data
-# any data about the user
-# agent integrates with the baseAgent pattern for easy orchestrator integration
-# easy to switch between local testing and a DB in a container in our server via .env file
-
 class DBAgent(BaseAgent):
-    # database agent that queries patient info
-    # extends baseAgent, provides specialized tools for accessing patient data from a DB
-
     def __init__(self, db_connection: DatabaseConnection, prompts):
         self.name = "DBAgent"
         self.description = prompts["descriptions"]
