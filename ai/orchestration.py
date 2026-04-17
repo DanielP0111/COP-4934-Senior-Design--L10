@@ -26,11 +26,9 @@ def initAssistant(agent: BaseAgent, key, *args):
     return assistant
 
 def initOrchestrator(assistants: [BaseAgent]):
-
     orchestratorAgent = ConversableAgent(
         name = "orchestrator",
         system_message = prompts["orchestrator"]["instructions"],
-        #max_consecutive_auto_reply=3,
         llm_config=LLM_CONFIG,
         human_input_mode="NEVER"
     )
@@ -99,7 +97,3 @@ def orchestrate(full_message_with_context: str):
         reply = "I'm sorry, there was an error in the response. Please try again."
     
     return reply
-
-if __name__ == "__main__":
-    message = "I am a 55 year old pregnant woman who smokes, can you give me some healthcare advice?"
-    orchestrate(message)

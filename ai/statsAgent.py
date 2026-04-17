@@ -1,7 +1,6 @@
-from autogen import LLMConfig, ConversableAgent, UserProxyAgent
+from autogen import LLMConfig, UserProxyAgent
 from baseAgent import BaseAgent
-from tools.statTool import BMITool,pyTool, CodeExecutor
-
+from tools.statTool import pyTool, CodeExecutor
 
 class StatAgent(BaseAgent):
     def __init__(self, executor: CodeExecutor, prompts):
@@ -14,11 +13,9 @@ class StatAgent(BaseAgent):
             description = self.description,
             system_message = self.system_message,
             tools = [pyTool()]
-        )
-        
+        )   
 
 if __name__ == "__main__":    
-
     user_proxy = UserProxyAgent(
             name="user_proxy",
             human_input_mode="NEVER",
