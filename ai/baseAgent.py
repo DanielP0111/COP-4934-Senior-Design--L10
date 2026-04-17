@@ -1,7 +1,6 @@
 from autogen import LLMConfig, UserProxyAgent
 from typing import List
 from langchain.tools import BaseTool
-from autogen_ext.models.openai import OpenAIChatCompletionClient
 from autogen.agentchat import ConversableAgent
 
 def generate_llm_config(tool: BaseTool):
