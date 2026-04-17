@@ -1,15 +1,6 @@
-# agent specialziing in look up medication prices from CostPlusDrugs
-# uses webParseTool to search for medications using DrugPriceLookupTool
-
 from autogen import UserProxyAgent
 from baseAgent import BaseAgent
 from tools.webParseTool import DrugPriceLookupTool
-
-# extends BaseAgent. provides drug prices using the DrugPriceLookupTool
-# ex. of queries it can handle:
-# "What is the price of metformin?"
-# "How much does lisinopril 10mg cost?"
-# "Compare prices for atorvastatin"
 
 class PriceAgent(BaseAgent):
     def __init__(self, prompts):
@@ -23,11 +14,7 @@ class PriceAgent(BaseAgent):
             system_message=self.system_message,
             tools=self.tools
         )
-    
 
-# testing
-
-# returns list of test queries to use
 def get_test_queries():
     return [
         "What is the price of metformin?",
@@ -37,7 +24,6 @@ def get_test_queries():
         "How much is amlodipine?",
     ]
 
-# testing block
 if __name__ == "__main__":
     print("initializing priceAgent...")
 
