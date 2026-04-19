@@ -1,11 +1,6 @@
 # web parse tool that currently looks up drug prices
 # from costplusdrugs
-
 # fetches complete drug DB, caches, and matches
-
-# =========================
-# 1: IMPORTS
-# =========================
 
 from typing import Dict, Any, Type, Optional, List, ClassVar
 from pydantic import BaseModel, Field
@@ -17,25 +12,16 @@ from difflib import SequenceMatcher
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup, Comment
 
-# =========================
-# 2: POTENTIAL SHARED UTILITIES
-# =========================
-
 # calculate similiarity ratio using a sequence matcher library
 # takes in 2 strings and returns a similarity ratio between 0.0 and 1.0
 # this is for fuzzy matching for later
 def calculate_similarity(str1: str, str2: str) -> float:
     return SequenceMatcher(None, str1.lower(), str2.lower()).ratio()
 
-# =========================
-# 3: DRUG LOOKUP TOOL
-# =========================
-
 class DrugPriceLookupArgs(BaseModel):
     drug_name: str = Field(..., description="Name of the medication to search for (for example, 'metformin' or 'lisinopril 10mg')")
     max_results: int = Field(5, description="Maximum number of results to return (default: 5)")
 
-# tool for looking up medication prices from costplusdrugs
 class DrugPriceLookupTool(BaseTool):
     name: str = "drug_price_lookup"
     description: str = (
@@ -45,28 +31,20 @@ class DrugPriceLookupTool(BaseTool):
     )
     args_schema: Type[BaseModel] = DrugPriceLookupArgs
 
-    # i am not sure how often this changes so i decided to cache the data for 24 hrs
-    # in case it does change. i can rework the logic around this and remove it entirely
-    # if it turns out we dont need it.
+    # cache
     API_URL: ClassVar[str] = "https://us-central1-costplusdrugs-publicapi.cloudfunctions.net/main"
     CACHE_DURATION_HOURS: ClassVar[int] = 24
     _cached_drugs: ClassVar[Optional[List[Dict[str, Any]]]] = None
     _cache_timestamp: ClassVar[Optional[datetime]] = None
 
-    # fetches complete DB from the cost plus drugs API
-    # caches so API doesn't have to be called so much
-    # returns an array of drug objects with price info
-    # if API call fails requestException is raised
     def fetch_drug_database(self) -> List[Dict[str, Any]]:
         
-        # is cache valid
         if self._cached_drugs is not None and self._cache_timestamp is not None:
             cache_age = datetime.now() - self._cache_timestamp
             if cache_age < timedelta(hours=self.CACHE_DURATION_HOURS):
                 print(f"using cached drug database ({len(self._cached_drugs)} drugs)")
                 return self._cached_drugs
             
-        # get new data
         print(f"fetching drug DB from {self.API_URL}...")
         try:
             response = requests.get(self.API_URL, timeout=30)
@@ -96,11 +74,7 @@ class DrugPriceLookupTool(BaseTool):
             
             raise
     
-    # search drugs goes here
-    # search for drugs matching query string
-    # uses fuzzy matching (finding strings based on matching patterns and not identically)
-    # fuzzy matching handles variations in spelling/formatting of drug names
-    # searches medication_name field and ranks the results
+    # search drugs using fuzzy matching
     # returns a list of matching drug objects with the best matching one first
     def search_drugs(self, query: str, drugs: List[Dict[str, Any]], threshold: float = 0.6) -> List[Dict[str, Any]]:
         query_lower = query.lower().strip()
@@ -126,10 +100,7 @@ class DrugPriceLookupTool(BaseTool):
         matches.sort(key=lambda x: x["similarity"], reverse=True)
         return [match["drug"] for match in matches]
     
-    # format drug info goes here
-    # formats the drug info cleanly for agent to take in
     def format_drug_info(self, drug: Dict[str, Any]) -> Dict[str, Any]:
-        # parse price
         unit_price = drug.get("unit_billing_price", "$0.00").replace("$", "")
         quantity = int(drug.get("medisapn_quantity", 1))
 
@@ -157,7 +128,6 @@ class DrugPriceLookupTool(BaseTool):
             "auto_refill": drug.get("auto_refill", False)
         }
     
-    # searches for drug prices
     def _run(self, drug_name: str, max_results: int = 5) -> Dict[str, Any]:
         print(f"searching for: {drug_name}...")
         try:
@@ -195,10 +165,8 @@ class DrugPriceLookupTool(BaseTool):
     async def _arun(self, drug_name: str, max_results: int = 5) -> Dict[str, Any]:
         return self._run(drug_name, max_results)
     
-# =========================
-# 4. HTML PARSING TOOL
-# =========================
-
+# HTML parser tool
+# parses HTML from any web page
 class HTMLParserArgs(BaseModel):
     url: str = Field(..., description="URL of the webpage to parse (like 'http://example.com/blog')")
     extract_text: bool = Field(True, description="Extract all visible text content from the page (default: True)")
@@ -206,11 +174,6 @@ class HTMLParserArgs(BaseModel):
     extract_images: bool = Field(False, description="Extract all image sources from the page (default: False)")
     extract_scripts: bool = Field(False, description="Extract all script tags and their content (ATTACK VECTOR) (default: False)")
     extract_hidden: bool = Field(False, description="Extract hidden, invisible content like comments (ATTACK VECTOR) (default: False)")
-
-# parses HTML from any web page
-# takes text, links, scripts, hidden/invisible content, scalable for any HTML page
-# warning: this is a research tool, so this extracts everything including potentially malicious items from a web page
-# use on sites known to be safe in order to be safe
 
 class HTMLParserTool(BaseTool):
     name: str = "html_parser"
@@ -348,7 +311,7 @@ class HTMLParserTool(BaseTool):
                 'hide'
             ]):
                 element.decompose()
-        #removes anything off screen
+        # removes anything off screen
         for element in soup_text.find_all(style=True):
             style = element['style'].replace(" ", "").lower()
 
@@ -406,12 +369,6 @@ class HTMLParserTool(BaseTool):
         return images
     
     # extracts all script tags
-    # this is an attack vector
-    # the idea is bad actors inject code into webpages that gets extracted and potentially executed by the agent
-    # could include JS containing prompt injection instructions
-    # could include encoded commands hidden
-    # could include remote script loading from malicious servers
-    # etc etc
     def _extract_scripts(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
         scripts = []
 
@@ -448,13 +405,9 @@ class HTMLParserTool(BaseTool):
         return scripts
     
     # extracts all hidden content
-    # this is an attack vector
-    # the idea is attackers hide malicious instructions in things like
-    # HTML comments, hidden elements, data attributes, custom meta tags, offscreen elements
     def _extract_hidden_content(self, soup: BeautifulSoup) -> Dict[str, Any]:
         hidden = {}
 
-        # extract HTML comments
         comments = soup.find_all(string=lambda text: isinstance(text, str) and text.strip().startswith('<!--'))
         if not comments:
             comments = soup.find_all(string=lambda text: isinstance(text, Comment))
@@ -577,44 +530,3 @@ class HTMLParserTool(BaseTool):
     ) -> Dict[str, Any]:
         return self._run(url, extract_text, extract_links, extract_images, extract_scripts, extract_hidden)
 
-# =========================
-# 5. TESTING BLOCK
-# =========================
-
-# includes testing/debug stuff for now for the drug lookup tool
-
-if __name__ == "__main__":
-    print("testing DrugPriceLookupTool...")
-
-    tool = DrugPriceLookupTool()
-
-    test_queries = [
-        "metformin",
-        "lisinopril 10mg",
-        "albuterol",
-        "atorvatstatin",
-        "nonexistent_drug_xyz"
-    ]
-
-    for i, query in enumerate(test_queries, 1):
-        print(f"\n{'='*50}")
-        print(f"Test {i}: {query}")
-        print(f"\n{'='*50}")
-
-        result = tool._run(query, max_results=3)
-
-        if result["found"]:
-            print(f"\n found {result['count']} results:")
-            for j, drug in enumerate(result["results"], 1):
-                print(f"\n  {j}. {drug['medication_name']}")
-                print(f"    Brand: {drug['brand_name']}")
-                print(f"    Form: {drug['form']} | Strength: {drug['strength']}")
-                print(f"    Price per unit: {drug['price_per_unit']}")
-                print(f"    Total price: {drug['total_price']}")
-                print(f"    URL: {drug['url']}")
-        else:
-            print(f"\n {result['message']}")
-            if "error" in result:
-                print(f"    error: {result['error']}")
-    
-    print("testing complete.")
