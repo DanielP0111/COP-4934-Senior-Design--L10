@@ -9,12 +9,7 @@ class UserMessageBuilder():
         context_block = f"--CONTEXT--\nTHIS IS A CHAT WITH USER ID {self.user}\n"
         
         for m in self.chat_body["messages"]:
-            if m["role"] == "user":
-                clean_context_message = self.input_cleanser.cleanInput(m["content"])
-                if clean_context_message != "Greyhawk 10":
-                    context_block += f"{m["role"]} ({self.user}): {clean_context_message}\n"
-            else:
-                context_block += f"{m["role"]}: {m["content"]}\n"
+            context_block += f"{m["role"]}: {m["content"]}\n"
                 
         context_block += "--CONTEXT--\n"
         
@@ -35,7 +30,4 @@ class UserMessageBuilder():
         message_header = f"USER MESSAGE (USER ID: {self.user}): "
         user_message = self._getUserMessage()
         
-        if user_message == "Greyhawk 10":
-            return "Your request was flagged as potentially violating our safety regulations. Please try again with a different prompt."
-        else:
-            return orchestrate(context_block + message_header + user_message)   
+        return orchestrate(context_block + message_header + user_message)   
