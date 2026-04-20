@@ -3,13 +3,13 @@
 document.addEventListener("DOMContentLoaded", () => {
 
   const targetTitle = "Open WebUI";
-  const newTitle = "DocTalk";
+  const newTitle = "DocTalk V1";
 			
   const targetIntro = "Hello, User";
   const newIntro = "How can I help?";
 
   const targetAuth = "Sign in to Open WebUI"
-  const newAuth = "Sign in to DocTalk"
+  const newAuth = "Sign in to DocTalk V1"
 			
 	//replace agent greeting title
   function replaceIntro() {
@@ -57,8 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Change doc title
   const titleObserver = new MutationObserver(() => {
-    if (document.title !== "DocTalk") {
-      document.title = "DocTalk";
+    if (document.title !== "DocTalk V1") {
+      document.title = "DocTalk V1";
     }
   });
 
