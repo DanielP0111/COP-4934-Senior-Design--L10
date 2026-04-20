@@ -1,5 +1,5 @@
 # Security Concerns in Agentic AI
-COP-4934-Senior-Design--L19. This repository is for UCF Senior Design team L19. We are researching security concerns in agentic AI systems in conjunction with the Georgia Tech Research Institute (GTRI).
+This repository is for UCF Senior Design team L19. We are researching security concerns in agentic AI systems in conjunction with the Georgia Tech Research Institute (GTRI).
 
 <img src="./themes/favicon.png" alt="DocTalk Logo" width="150" height="150">
 
