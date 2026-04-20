@@ -20,7 +20,6 @@ from statsAgent import StatAgent,DockerCodeExecutor
 from utils import load_prompts, load_safeguards
 from messageCleanser import OutputCleanser
 
-
 LLM_CONFIG = LLMConfig.from_json(path = "OAI_CONFIG_LIST.json")
 prompts = load_prompts()
 safeguards = load_safeguards()
@@ -32,11 +31,9 @@ def initAssistant(agent: BaseAgent, key, *args):
     return assistant
 
 def initOrchestrator(assistants: [BaseAgent]):
-
     orchestratorAgent = ConversableAgent(
         name = "orchestrator",
         system_message = prompts["orchestrator"]["instructions"],
-        #max_consecutive_auto_reply=3,
         llm_config=LLM_CONFIG,
         human_input_mode="NEVER"
     )
@@ -73,8 +70,6 @@ user = UserProxyAgent(
     code_execution_config={"use_docker": False},
 )
 
-
-
 safeguard_enforcer = apply_safeguard_policy(
     agents=[orchestratorAgent, statsAgent.agent],
     policy="safeguards.json",
@@ -88,7 +83,6 @@ def orchestrate(full_message_with_context):
         group_manager_args={"llm_config": LLM_CONFIG},
         user_agent=user,
     )
-
 
     result, final_context, last_agent = initiate_group_chat(
         pattern=agent_pattern,

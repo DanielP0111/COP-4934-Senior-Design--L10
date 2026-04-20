@@ -5,16 +5,9 @@ from sqlalchemy import create_engine, Column, Integer, String, Text, Boolean, Da
 from sqlalchemy.orm import sessionmaker, relationship, declarative_base
 from datetime import datetime
 from request_context import get_verified_user_id
-from datetime import datetime
 import os
 
-# pip install sqlalchemy should have alr been ran
-
 Base = declarative_base()
-
-# below includes local database setup for testing with a real SQL database
-# this in-memory DB will not be used for testing in prod
-# instead, the connection string will be changed to our DB in a container located on Bill
 
 # models for SQLAlchemy that define schema
 class Patient(Base):
@@ -31,15 +24,11 @@ class Patient(Base):
     medical_history = relationship("MedicalHistory", back_populates="patient", uselist=False, cascade="all, delete-orphan")
     appointments = relationship("Appointment", back_populates="patient", cascade="all, delete-orphan")
     prescriptions = relationship("Prescription", back_populates="patient", cascade="all, delete-orphan")
-    medical_history = relationship("MedicalHistory", back_populates="patient", uselist=False, cascade="all, delete-orphan")
-    appointments = relationship("Appointment", back_populates="patient", cascade="all, delete-orphan")
-    prescriptions = relationship("Prescription", back_populates="patient", cascade="all, delete-orphan")
 
 
 class MedicalHistory(Base):
     __tablename__ = 'medical_history'
     
-    id = Column(Integer, primary_key=True, autoincrement=True)
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('patients.user_id'), nullable=False)
     conditions = Column(Text)
@@ -122,8 +111,6 @@ def verify_user_access(requested_user_id: int) -> Optional[Dict[str, Any]]:
     return None
 
 # database tool classes
-
-# query patient info
 class QueryPatientInfoArgs(BaseModel):
     user_id: int = Field(..., description="Patient user ID")
 
@@ -164,7 +151,6 @@ class QueryPatientInfoTool(BaseTool):
     async def _arun(self, user_id: int) -> Dict[str, Any]:
         return self._run(user_id)
     
-# query medical history
 class QueryMedicalHistoryArgs(BaseModel):
     user_id: int = Field(..., description="Patient user ID")
 
@@ -204,7 +190,6 @@ class QueryMedicalHistoryTool(BaseTool):
     async def _arun(self, user_id: int) -> Dict[str, Any]:
         return self._run(user_id)
 
-# query appointments
 class QueryAppointmentsArgs(BaseModel):
     user_id: int = Field(..., description="patient user ID")
 
@@ -257,7 +242,6 @@ class QueryAppointmentsTool(BaseTool):
         return self._run(user_id)
 
 
-# Tool 4: Query Prescriptions
 class QueryPrescriptionsArgs(BaseModel):
     user_id: int = Field(..., description="patient user ID")
     active_only: bool = Field(True, description="if True, return only active prescriptions")
@@ -316,8 +300,6 @@ class QueryPrescriptionsTool(BaseTool):
     async def _arun(self, user_id: int, active_only: bool = True) -> Dict[str, Any]:
         return self._run(user_id, active_only)
 
-# - database write tools -
-# tool 1: update patient records
 class UpdatePatientRecordArgs(BaseModel):
     user_id: int = Field(..., description="Patient user ID")
     table: str = Field(..., description="Table to update")
@@ -415,7 +397,6 @@ class UpdatePatientRecordTool(BaseTool):
     async def _arun(self, user_id: int, table: str, updates: Dict[str, Any], record_id: Optional[int] = None) -> Dict[str, Any]:
         return self._run(user_id, table, updates, record_id)
 
-# tool 2: add patient records
 class AddPatientRecordArgs(BaseModel):
     table: str = Field(..., description="Table to add record to")
     record_data: Dict[str, Any] = Field(..., description="Dict containing all fields needed for new record besides id which will be generated")
@@ -494,13 +475,11 @@ class AddPatientRecordTool(BaseTool):
     async def _arun(self, table: str, record_data: Dict[str, Any]) -> Dict[str, Any]:
         return self._run(table, record_data)
 
-# tool 3: delete patient records
 class DeletePatientRecordArgs(BaseModel):
     user_id: Optional[int] = Field(None, description="Patient user id (optional for patients)")
     table: str = Field(..., description="Table to delete from")
     record_id: int = Field(..., description="id of the record to delete")
 
-# tool to delete an appointment record
 class DeletePatientRecordTool(BaseTool):
     name: str = "delete_appointment_record"
     description: str = """Delete a record from the appointments table in the database.
@@ -570,40 +549,3 @@ class DeletePatientRecordTool(BaseTool):
     
     async def _arun(self, table: str, record_id: int, user_id: Optional[int] = None) -> Dict[str, Any]:
         return self._run(table, record_id, user_id)
-
-# testing block
-# if __name__ == "__main__":
-#     # test db connection
-#     print("initializing database connection...")
-#     db = DatabaseConnection()
-#     print("\ntesting connection...")
-#     db.test_connection()
-
-#     print("\n" + "="*50)
-#     print("testing tools")
-#     print("\n" + "="*50)
-
-#     # test each tool
-#     patient_tool = QueryPatientInfoTool(db)
-#     print("\n1. testing QueryPatientInfoTool...")
-#     result = patient_tool._run(1001)
-#     print(f"Result: {result}")
-
-#     history_tool = QueryMedicalHistoryTool(db)
-#     print("\n2. testing QueryMedicalHistoryTool...")
-#     result = history_tool._run(1001)
-#     print(f"Result: {result}")
-
-#     appointments_tool = QueryAppointmentsTool(db)
-#     print("\n3. testing QueryAppointmentsTool...")
-#     result = appointments_tool._run(1001)
-#     print(f"Result: {result}")
-
-#     prescriptions_tool = QueryPrescriptionsTool(db)
-#     print("\n4. testing QueryPrescriptionsTool...")
-#     result = prescriptions_tool._run(1001)
-#     print(f"Result: {result}")
-
-#     print("\n" + "="*50)
-#     print("all tools tested successfully!")
-#     print("\n" + "="*50)

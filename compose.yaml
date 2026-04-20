@@ -22,7 +22,7 @@ services:
     build:
       context: .
       dockerfile: startup/Dockerfile.agents
-    image: agent-image # Just the name, not the actual image
+    image: agent-image
     container_name: agents
     ports:
       - "2001:8000"
@@ -47,7 +47,7 @@ services:
     restart: unless-stopped
 
   webui:
-    image: ghcr.io/open-webui/open-webui:main
+    image: ghcr.io/open-webui/open-webui:0.8.10
     build:
       context: .
       dockerfile: startup/Dockerfile.webui
@@ -68,7 +68,7 @@ services:
       - ENABLE_FORWARD_USER_INFO_HEADERS=True
       - WEBUI_PORT=8080
       - WEBUI_HOST=0.0.0.0
-      - OPENAI_API_BASE_URL=https://agents:8000/v1 #added s on the end here
+      - OPENAI_API_BASE_URL=https://agents:8000/v1
       - ENABLE_TITLE_GENERATION=False
       - ENABLE_FOLLOW_UP_GENERATION=False
       - ENABLE_AUTOCOMPLETE_GENERATION=False
@@ -84,7 +84,7 @@ services:
     build:
       context: .
       dockerfile: startup/Dockerfile.kali
-    image: kali-image # Just the name, not the actual image
+    image: kali-image
     container_name: kali
     stdin_open: true
     tty: true

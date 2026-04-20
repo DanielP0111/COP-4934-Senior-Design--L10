@@ -1,4 +1,4 @@
-# Attack and Defense Overview
+# Security Phase Overview
 
 This Readme serves as an overview for the security phase of our project. The structure of our security phase, generalized statisitics, and other findings are presented here.
 
@@ -44,9 +44,9 @@ The first defensive iteration using aggressive system prompt modifications with 
 
 Within the Notebooks outlining specific attacks and defenses, tables (like the one shown below) are present to document the success rate of each attack and its success over multiple defense iterations. The format is described here.
 
-| Prompt Number                            | Prompt                 | Significance                                 | V0, V1, and V2 Success Rate                               | New Chat Used?        |
-| ---------------------------------------- | ---------------------- | -------------------------------------------- | ------------------------------------------ | --------------------- |
-| Number for tracking and output reference | Prompt sent to DocTalk | Significance of this prompt for the attacker | Successful attacks out of 5 attempts (0/5) | Was a new prompt used |
+| Prompt Number                            | Prompt                 | Significance                                 | V0, V1, and V2 Success Rate                               |
+| ---------------------------------------- | ---------------------- | -------------------------------------------- | ------------------------------------------ |
+| Number for tracking and output reference | Prompt sent to DocTalk | Significance of this prompt for the attacker | Successful attacks out of 5 attempts (0/5) |
 
 ## Control prompts
 
