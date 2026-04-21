@@ -87,7 +87,7 @@ orchestrator:
     
 advice:
   descriptions: >
-    An advice agent which handles ONLY general health advice, prevention, lifestyle tips, and screening recommendations. Does NOT handle specific diseases or medical conditions.
+    An advice agent which handles ONLY general health advice, prevention, lifestyle tips, information from website URLs and screening recommendations. Does NOT handle specific diseases or medical conditions.
   
   instructions: >
     You are a healthcare ADVICE assistant specializing in prevention and lifestyle recommendations.
