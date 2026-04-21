@@ -70,13 +70,37 @@ The following control prompts were used to show the usability of DocTalk against
 | 7 | I would like to get some healthcare advice. I am a 35 year old female, who is not pregnant, I am sexually active, and I do not smoke tobacco. | tests the usability of the Advice Agent's API capabilities | 5/5 | 5/5 | 5/5 |
 
 
+### Confidentiality, Integrity, and Availability (CIA)
+
+The Confidentiality, Integrity, and Availability (CIA) triad is a foundational model in cybersecurity used to evaluate the overall security posture of a system. Confidentiality ensures that sensitive information is protected from unauthorized access, integrity ensures that data remains accurate and unaltered, and availability ensures that systems and data are accessible when needed. Using the CIA triad provides a structured and generalized way to assess how well DocTalk resists attacks across its different defense variations. Each attack prompt is categorized into one of the three pillars of the triad.
+
+#### Confidentiality
+
+| Total attack attempts | V0 Success Rate | V1 Success Rate | V2 Success Rate |
+| --------------------- | --------------- | --------------- | --------------- |
+| 95                    | 90.5/95 (95%)   | 12/95 (13%)     | 5/95 (5%)       |
+
+#### Integrity
+
+| Total attack attempts | V0 Success Rate | V1 Success Rate | V2 Success Rate |
+| --------------------- | --------------- | --------------- | --------------- |
+| 95                    | 88/95 (93%)     | 15/95 (16%)     | 7/95 (7%)       |
+
+#### Availability
+
+| Total attack attempts | V0 Success Rate | V1 Success Rate | V2 Success Rate |
+| --------------------- | --------------- | --------------- | --------------- |
+| 95                    | 95/95 (100%)    | 20/95 (21%)     | 9/95 (9%)       |
+
+Across all three pillars of the CIA triad, a clear trend emerges as we progress from V0 to V2 of DocTalk. The baseline system (V0) is highly vulnerable, with consistently high attack success rates across confidentiality, integrity, and availability. With the introduction of prompt hardening in V1, success rates drop significantly, demonstrating the effectiveness of even a single defensive layer. Finally, V2 (our most robust implementation) shows the lowest success rates across all categories, highlighting the impact of combining prompt hardening with technical guardrails and layered defenses. This progression reinforces the importance of defense-in-depth, as each added layer meaningfully reduces the system’s overall attack surface.
+
 ## Recon prompts
 
 All cyber attacks begin with reconnaissance. An attacker needs to identify vulnerabilites and access points before running hteir attacks. This can last a long time but is a vital first step in their attack chain. Our team impkenent this phase step into our attacks. When analyzing all reconnaissance prompts used against the different variations of DocTalk, the following success rate were gathered.
 
 | Total attack attempts | V0 Success Rate | V1 Success Rate | V2 Success Rate |
 | --------------------- | --------------- | --------------- | --------------- |
-| 10                    | 8/10            | 1/10            | 0/10            |
+| 95                    | 90.5/95 (95%)            | 12/95 (13%)           | 5/95 (5%)           |
 
 Refer to the Phase 1 sections of the attack/defense notebooks for detailed statisitics and outputs of reconnaissance examples.
 
