@@ -72,37 +72,33 @@ The following control prompts were used to show the usability of DocTalk against
 
 ## Recon prompts
 
-When analyzing reconnaissance prompts across all attacks on DocTalk the following success rate was gathered.
+All cyber attacks begin with reconnaissance. An attacker needs to identify vulnerabilites and access points before running hteir attacks. This can last a long time but is a vital first step in their attack chain. Our team impkenent this phase step into our attacks. When analyzing all reconnaissance prompts used against the different variations of DocTalk, the following success rate were gathered.
 
 | Total attack attempts | V0 Success Rate | V1 Success Rate | V2 Success Rate |
 | --------------------- | --------------- | --------------- | --------------- |
 | 10                    | 8/10            | 1/10            | 0/10            |
 
-Note: we can further classify these recon prompts into if they target certain agents, tools, features etc.
-
-Refer to specific examples and their success rates in the section called 'Phase 1' [here](./doc.ipynb#Phase-1:-Reconnaissance)
+Refer to the Phase 1 sections of the attack/defense notebooks for detailed statisitics and outputs of reconnaissance examples.
 
 ## Remote Code Execution attack prompts
 
-When analyzing Remote Code Execution prompts across all attacks on DocTalk the following success rate was gathered.
+DocTalk's use of a code execution tool opens up a range of vulnerabilities. It allowed our attack pairs to execute remote code to alter the systems state and chain attacks. When analyzing all Remote Code Execution attack prompts used against the different variations of DocTalk, the following success rate were gathered.
 
 | Total attack attempts | V0 Success Rate | V1 Success Rate | V2 Success Rate |
 | --------------------- | --------------- | --------------- | --------------- |
 | 8                    | 8/8              | 2/8             |  0/8            |
 
-Note: we can further classify these recon prompts into if they target certain agents, tools, features etc.
+Refer to the attack/defense notebooks for detailed statisitics and outputs of Remote Code Execution attack examples.
 
-Refer to specific examples and their success rates in the section called 'Phase 3' [here](./doc.ipynb#Phase-3:-Delivery)
+## Prompt Injection attacks
 
-## Context Injection Prompts
-
-When analyzing Context Injection prompts across all attacks on DocTalk the following success rate was gathered.
+Prompt Injection attacks are what most people think of in regards to AI security. Giving an agent new instructions or telling it to drop its instructions is just one example. Prompt injection attacks were used against DocTalk. When analyzing all Prompt Injection attack prompts used against the different variations of DocTalk, the following success rate were gathered.
 
 | Total attack attempts | V0 Success Rate | V1 Success Rate | V2 Success Rate |
 | --------------------- | --------------- | --------------- | --------------- |
 | 5                     | 5/5             | 0/5             | 0/5             |
 
-Note: we can further classify these recon prompts into if they target certain agents, tools, features etc.
+Refer to the attack/defense notebooks for detailed statisitics and outputs of Prompt Injection attack examples.
 
 ## Most secure agents
 
