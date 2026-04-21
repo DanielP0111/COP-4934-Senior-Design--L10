@@ -29,10 +29,9 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
     volumes:
-      - ./main.py:/main.py:ro
-    volumes:
       - ${DOCKER_SOCK}:/var/run/docker.sock
       - ${WORKDIR}:/executor
+      - ./main.py:/main.py:ro
     networks:
       - billnet
     depends_on:
