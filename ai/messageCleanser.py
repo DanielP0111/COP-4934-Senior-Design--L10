@@ -19,21 +19,25 @@ class InputFilter():
 
         # Banned words
         self.fuzzy_patterns = [
-            'ignore', 'bypass', 'override', 'reveal', 'delete', 'context', 'delegate', 'handoff', 'hand-off', 'agent', 'tool'
+            'ignore', 'bypass', 'override', 'reveal', 'delete', 'context', 'delegate', 'handoff', 'hand-off', 'agent', 'tool','sys'
         ]
     
     def detectInjection(self, text: str) -> bool:
-        if any(re.search(pattern, text, re.IGNORECASE)
-            for pattern in self.dangerous_patterns):
+        harmful_pattern = next((pattern for pattern in self.dangerous_patterns 
+                                if re.search(pattern, text, re.IGNORECASE)), None)
+        if harmful_pattern:
+            print(f'\n{(26 + len(harmful_pattern))*'='}\nHarmful Pattern Detected: {harmful_pattern}\n{(26 + len(harmful_pattern))*'='}\n')
             return True
         detector = LanguageDetectorBuilder.from_all_languages_with_latin_script().with_low_accuracy_mode().build()
-        if detector.detect_language_of(text) != Language.ENGLISH:
+        if len(text.split()) > 5 and detector.detect_language_of(text) != Language.ENGLISH:
+            print(f'\n{29*'='}\nNon-English Language Detected\n{29*'='}\n')
             return True
         # Fuzzy matching for misspelled words (typoglycemia defense)
         words = re.findall(r'\b\w+\b', text.lower())
         for word in words:
             for pattern in self.fuzzy_patterns:
                 if self._isSimilarWord(word, pattern):
+                    print(f'\n{(23 + len(word))*'='}\nHarmful Word Detected: {word}\n{(23 + len(word))*'='}\n')
                     return True
         return False
 
@@ -48,6 +52,7 @@ class InputFilter():
     def sanitizeInput(self, text: str) -> str:
         text = re.sub(r'\s+', ' ', text)
         text = re.sub(r'(.)\1{3,}', r'\1', text)
+        text = re.sub('system', 'service', text, flags=re.IGNORECASE)
 
         for pattern in self.dangerous_patterns:
             text = re.sub(pattern, '[FILTERED]', text, flags=re.IGNORECASE)
@@ -59,7 +64,6 @@ class InputCleanser():
     
     def cleanInput(self, message: str) -> str:
         if self.message_filter.detectInjection(message):
-            time.sleep(random.randint(14, 20))
             return "Greyhawk 10"
         
         clean_message = self.message_filter.sanitizeInput(message)
@@ -84,6 +88,7 @@ class OutputCleanser:
 
     def cleanOutput(self, message: str) -> str:
         if not self.validateOutput(message) or len(message) > 5000:
+            time.sleep(random.randint(7, 12))
             return "Your request was flagged as potentially violating our safety regulations. Please try again with a different prompt."
         
         clean_message = message

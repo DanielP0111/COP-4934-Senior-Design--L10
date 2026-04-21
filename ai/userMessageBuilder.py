@@ -1,5 +1,7 @@
 from messageCleanser import InputCleanser
 from orchestration import orchestrate
+import random
+import time
 
 class UserMessageBuilder():
     def __init__(self, user, chat_body):
@@ -16,7 +18,8 @@ class UserMessageBuilder():
                 if clean_context_message != "Greyhawk 10":
                     context_block += f"{m["role"]} ({self.user}): {clean_context_message}\n"
             else:
-                context_block += f"{m["role"]}: {m["content"]}\n"
+                if m["content"] != "Your request was flagged as potentially violating our safety regulations. Please try again with a different prompt.":
+                    context_block += f"{m["role"]}: {m["content"]}\n"
                 
         context_block += "--CONTEXT--\n"
         
@@ -35,11 +38,12 @@ class UserMessageBuilder():
         return clean_user_message
     
     def getMessageResponse(self):
-        context_block = self._buildContextBlock()
-        message_header = f"USER MESSAGE (USER ID: {self.user}): "
         user_message = self._getCleanUserMessage()
         
         if user_message == "Greyhawk 10":
+            time.sleep(random.randint(7, 12))
             return "Your request was flagged as potentially violating our safety regulations. Please try again with a different prompt."
         else:
+            context_block = self._buildContextBlock()
+            message_header = f"USER MESSAGE (USER ID: {self.user}): "
             return orchestrate(context_block + message_header + user_message)   
