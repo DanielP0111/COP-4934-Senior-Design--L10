@@ -1,16 +1,18 @@
 # Security Phase Overview
 
-This Readme serves as an overview for the security phase of our project. The structure of our security phase, generalized statisitics, and other findings are presented here.
+During the security phase of our project, team members split into attack pairs. Each pair developed a complex cyber attack, deployed it against DocTalk’s different defense variations, and then analyzed the success rates of these attacks. This document provides a generalized overview of our research process, defenses, attacks, and findings.
 
-The other files in this directory contain written and statisitical documentation of our teams cyber attacks and defenses on DocTalk. Each attack and defense pair has two Jupyter Notebooks associated with it. One notebook contains the outline of both the attack and defense as well as success rate statistis. The other notebook logs all responses made by DocTalk when compiling success rate statisitics. The prompt and response are separated for cleanliness. 
+The nested directories contain detailed documentation (within Jupyter Notebooks) of our team’s cyber attacks and defenses on DocTalk. There is one master document file per directory that contains the attack flow, defenses, success rate statistics, and corresponding outputs.
+
+*Note: Links are added to the documentation to allow for easy navigation within the attack documentation. Unfortunately, GitHub does not support the use of these links. When cloned locally, the links will work correctly.*
 
 ## Defense Version Definitions
 
-Throughout each notebook, attack prompts are tested against three different versions of the DocTalk system, each representing a different level of security hardening. Success rates are recorded separately for each version to demonstrate the effectiveness of various defense strategies. Hardening against these two specific attacks were prioritized, and the differences in protection against the attacks are listed below.
+Throughout each notebook, attack prompts are tested against three different versions of the DocTalk system, each representing a different level of security hardening. Success rates are recorded separately for each version to demonstrate the effectiveness of various defense strategies. Hardening against these attacks were prioritized, and the differences in protection against the attacks are listed below.
 
 ### Version 0 (V0): Baseline/Control
 
-This is the first iteration of the DocTalk system we created with no protection against attack vectors. This includes:
+This is the first iteration of the DocTalk system we created with no vulnerability patching. This includes:
 
 - agents having basic system prompts with little security
 - no input validation
@@ -27,9 +29,14 @@ The first defensive iteration using aggressive system prompt modifications with 
 - verification requirements to call tools
 - upgraded/hardened system prompts for orchestrator, database agent and stats agent
 
-### Version 2 (v2): Guardrails + Code-Level Enforcement
+### Version 2 (V2): Prompt Hardening and Technical Guardrails
 
-- explanation of v2 modifications (unsure)
+A balance between prompt hardening and technical guardrails that contribute to a secure, yet operational system with redundant defenses. This is our team’s flagship version of DocTalk that goes beyond previous research in this field. Controls include:
+
+- Refined prompts that support both security and usability
+- Sandboxed and restricted code execution environment for the statAgent
+- Input and output cleansing
+- Network communication encryption
 
 ### Success Rate Interpretation
 
@@ -42,7 +49,7 @@ The first defensive iteration using aggressive system prompt modifications with 
 
 ### Statisitc Table Format
 
-Within the Notebooks outlining specific attacks and defenses, tables (like the one shown below) are present to document the success rate of each attack and its success over multiple defense iterations. The format is described here.
+Within the attack and defense notebooks, tables (like the one shown below) are present to document the success rate of each attack and its success over multiple defense iterations. The format is described here.
 
 | Prompt Number                            | Prompt                 | Significance                                 | V0, V1, and V2 Success Rate                               |
 | ---------------------------------------- | ---------------------- | -------------------------------------------- | ------------------------------------------ |
