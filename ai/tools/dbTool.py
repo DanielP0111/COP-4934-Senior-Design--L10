@@ -1,8 +1,9 @@
 from typing import Dict, Any, Type, Optional
 from pydantic import BaseModel, Field
 from langchain.tools import BaseTool
-from sqlalchemy import create_engine, Column, Integer, String, Text, Boolean, Date, JSON, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Text, Boolean, Date, JSON, ForeignKey, Time
 from sqlalchemy.orm import sessionmaker, relationship, declarative_base
+from datetime import datetime
 import os
 
 # pip install sqlalchemy should have alr been ran
@@ -17,11 +18,13 @@ Base = declarative_base()
 class Patient(Base):
     __tablename__ = 'patients'
     
-    user_id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
-    dob = Column(String(10), nullable=False)
-    email = Column(String(100))
-    phone = Column(String(20))
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, unique=True, nullable=False, index=True)
+    name = Column(Text, nullable=False)
+    dob = Column(Date)
+    gender = Column(Text)
+    email = Column(Text)
+    phone = Column(Text)
     
     medical_history = relationship("MedicalHistory", back_populates="patient", uselist=False)
     appointments = relationship("Appointment", back_populates="patient")
@@ -31,7 +34,7 @@ class Patient(Base):
 class MedicalHistory(Base):
     __tablename__ = 'medical_history'
     
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('patients.user_id'), nullable=False)
     conditions = Column(Text)
     allergies = Column(Text)
@@ -43,14 +46,14 @@ class MedicalHistory(Base):
 class Appointment(Base):
     __tablename__ = 'appointments'
     
-    id = Column(String(10), primary_key=True)
-    user_id = Column(Integer, ForeignKey('patients.user_id'), nullable=False)
-    date = Column(String(10), nullable=False)
-    time = Column(String(10), nullable=False)
-    doctor = Column(String(100), nullable=False)
-    specialty = Column(String(50))
-    type = Column(String(50))
-    status = Column(String(20))
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('patients.user_id', ondelete='CASCADE'), nullable=False, index=True)
+    date = Column(Date, nullable=False)
+    time = Column(Time, nullable=False)
+    doctor = Column(Text)
+    specialty = Column(Text)
+    type = Column(Text)
+    status = Column(Text)
     
     patient = relationship("Patient", back_populates="appointments")
 
@@ -58,14 +61,14 @@ class Appointment(Base):
 class Prescription(Base):
     __tablename__ = 'prescriptions'
     
-    id = Column(String(10), primary_key=True)
-    user_id = Column(Integer, ForeignKey('patients.user_id'), nullable=False)
-    medication = Column(String(100), nullable=False)
-    dosage = Column(String(50))
-    frequency = Column(String(50))
-    prescribing_doctor = Column(String(100))
-    start_date = Column(String(10))
-    refills_remaining = Column(Integer)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('patients.user_id', ondelete='CASCADE'), nullable=False, index=True)
+    medication = Column(Text)
+    dosage = Column(Text)
+    frequency = Column(Text)
+    prescribing_doctor = Column(Text)
+    start_date = Column(Date)
+    refills_remaining = Column(Integer, default=0)
     active = Column(Boolean, default=True)
     
     patient = relationship("Patient", back_populates="prescriptions")

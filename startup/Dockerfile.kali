@@ -2,15 +2,15 @@ FROM docker.io/kalilinux/kali-rolling
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    iputils-ping \
-    curl \
-    nmap \
-    net-tools \
-    tshark \
-    ffuf \
-    bettercap \
-    sqlmap
+#RUN apt-get update && \
+#    apt-get install -y --no-install-recommends \
+#    iputils-ping \
+#    curl \
+#    nmap \
+#    net-tools \
+#    tshark \
+#    ffuf \
+#    bettercap \
+#    sqlmap
 
 WORKDIR /root
