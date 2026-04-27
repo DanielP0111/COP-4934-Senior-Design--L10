@@ -31,7 +31,6 @@ services:
     volumes:
       - ${DOCKER_SOCK}:/var/run/docker.sock
       - ${WORKDIR}:/executor
-      - ./main.py:/main.py:ro
     networks:
       - billnet
     depends_on:
