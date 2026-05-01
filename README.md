@@ -19,13 +19,13 @@ Our main branch hosts all of the code and documentation for DocTalk V2. V2 is a 
 
 ## Our team
 Each member of our team is driven to learn, build, and secure agentic AI systems through direct implementation and testing, while sharing their knowledge with others. 
-- Jack - Project Manager and Eavesdropping Engineer
-- Liam - AI Lead Developer and Prompt Injection Engineer
-- Imani - AI Developer and Remote Code Execution Engineer
-- Bobby - AI Developer and Ransomware Engineer
-- Daniel - Lead Infrastructure Developer and Remote Code Execution Engineer
-- Carson - Infrastructure Developer and Ransomware Engineer
-- Colin - Infrastructure Developer and Prompt Injection Engineer
+- [Jack Livingston](https://github.com/LivingJW30) - Project Manager and Eavesdropping Engineer
+- [Liam Kilkenny](https://github.com/kilkennylj) - Lead AI Developer and Prompt Injection Engineer
+- [Imani McQuay](https://github.com/imanimcq) - AI Developer and Remote Code Execution Engineer
+- [Robert Gilmartin](https://github.com/fivecrzy) - AI Developer and Ransomware Engineer
+- [Daniel Perera](https://github.com/DanielP0111) - Lead Infrastructure Developer and Remote Code Execution Engineer
+- [Carson Cox](https://github.com/Carsoncox11) - Infrastructure Developer and Ransomware Engineer
+- [Colin Montie](https://github.com/cmont13) - Infrastructure Developer and Prompt Injection Engineer
 
 ## Disclaimer
 The information, techniques, tools, and examples that are depicted in this paper are displayed solely for educational purposes. No material in this paper encourages or supports illegal or unethical activity on any computing systems. Any and all cyber operations should be conducted in a legal manner on systems that the user either owns or has permission to use. The procedures described above were carried out solely on systems that either owned or were given consent to test on. The L19 Senior Design team is not liable for any consequences resulting from the use of the techniques described above on other computing systems. 
